@@ -1,15 +1,37 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/auth.css';
 
+
 const Auth = () => {
-  const [activeTab, setActiveTab] = useState('login');
+  const [searchParams] = useSearchParams();
+  const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
+  const [activeTab, setActiveTab] = useState(initialMode);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { login, register } = useAuth();
+
+  useEffect(() => {
+    setActiveTab(initialMode);
+    setError('');
+  }, [initialMode]);
+  const { login, loginWithGoogle, register } = useAuth();
+  const hasGoogleAuth = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setError('');
+    const result = await loginWithGoogle(credentialResponse.credential);
+    setLoading(false);
+    if (result.success) {
+      navigate('/');
+    } else {
+      setError(result.message);
+    }
+  };
 
   // Login form data
   const [loginData, setLoginData] = useState({
@@ -81,7 +103,7 @@ const Auth = () => {
             <div className="auth-image-overlay"></div>
             <div className="auth-image-text">
               <h2>Commencez votre parcours</h2>
-              <p>Rejoignez plus de 10 000 apprenants.</p>
+              <p>240 questions · 4 catégories · niveaux A1 à C2 · 100 % gratuit.</p>
             </div>
           </div>
 
@@ -121,6 +143,28 @@ const Auth = () => {
               }}>
                 {error}
               </div>
+            )}
+
+            {hasGoogleAuth && (
+              <>
+                {/* Google button — visible on both tabs */}
+                <div className="auth-google">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => setError('Connexion Google annulée ou échouée')}
+                    width="100%"
+                    shape="rectangular"
+                    theme="outline"
+                    size="large"
+                    text="continue_with"
+                    locale="fr"
+                  />
+                </div>
+
+                <div className="auth-divider">
+                  <span>ou</span>
+                </div>
+              </>
             )}
 
             {/* Login Form */}

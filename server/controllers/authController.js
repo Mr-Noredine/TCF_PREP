@@ -1,6 +1,9 @@
 import pool from '../config/database.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ═══════════════════════════════════════════════════════════
 // REGISTER USER
@@ -139,6 +142,73 @@ export const login = async (req, res) => {
       success: false,
       message: 'Erreur lors de la connexion'
     });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// GOOGLE OAUTH
+// ═══════════════════════════════════════════════════════════
+export const googleAuth = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ success: false, message: 'Token Google manquant' });
+    }
+
+    // Verify Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, given_name, family_name, picture } = payload;
+
+    // Find existing user (by google_id or email)
+    let result = await pool.query(
+      'SELECT id, email, firstname, lastname, level FROM users WHERE google_id = $1 OR email = $2',
+      [googleId, email.toLowerCase()]
+    );
+
+    let user;
+
+    if (result.rows.length > 0) {
+      user = result.rows[0];
+      // Attach google_id if user existed by email but never used Google before
+      if (!user.google_id) {
+        await pool.query('UPDATE users SET google_id = $1 WHERE id = $2', [googleId, user.id]);
+      }
+    } else {
+      // Create new user — no password for Google accounts
+      const insertResult = await pool.query(
+        `INSERT INTO users (email, firstname, lastname, google_id, level)
+         VALUES ($1, $2, $3, $4, 'A1')
+         RETURNING id, email, firstname, lastname, level`,
+        [email.toLowerCase(), given_name || 'Utilisateur', family_name || '', googleId]
+      );
+      user = insertResult.rows[0];
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRE || '7d' }
+    );
+
+    res.json({
+      success: true,
+      message: 'Connexion Google réussie',
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        level: user.level,
+      },
+    });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(401).json({ success: false, message: 'Token Google invalide' });
   }
 };
 

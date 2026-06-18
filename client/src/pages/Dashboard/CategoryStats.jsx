@@ -1,72 +1,105 @@
 import { useNavigate } from 'react-router-dom';
 
+const IcoFileText = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+  </svg>
+);
+const IcoBook = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+  </svg>
+);
+const IcoEdit = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+  </svg>
+);
+const IcoLibrary = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+  </svg>
+);
+
+const EmptyIco = () => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+  </svg>
+);
+
+const CAT_META = {
+  reading_comprehension: { color: '#4338CA', bg: '#EEF0FB', icon: IcoFileText },
+  grammar:               { color: '#5B54C9', bg: '#F0EFFA', icon: IcoBook     },
+  conjugation:           { color: '#4F6BD6', bg: '#EEF2FC', icon: IcoEdit     },
+  vocabulary:            { color: '#6366A8', bg: '#F0F1F7', icon: IcoLibrary  },
+};
+
 const CategoryStats = ({ progress }) => {
   const navigate = useNavigate();
 
   if (!progress || progress.length === 0) {
     return (
-      <div className="empty-state">
-        <div className="empty-state-icon">📚</div>
-        <div className="empty-state-title">Commencez à pratiquer</div>
-        <div className="empty-state-text">
-          Vos statistiques par catégorie apparaîtront ici
+      <div className="ds-empty">
+        <span className="ds-empty__ico"><EmptyIco /></span>
+        <p className="ds-empty__title">Commencez à pratiquer</p>
+        <p className="ds-empty__text">
+          Vos statistiques par catégorie apparaîtront ici après vos premiers exercices.
+        </p>
+        <div className="ds-empty__cta">
+          <a href="/exercices" className="btn-primary" style={{ fontSize: '.8rem', padding: '8px 18px' }}>
+            Commencer un exercice
+          </a>
         </div>
       </div>
     );
   }
 
-  const categoryIcons = {
-    grammar: { icon: '📖', color: '#3b82f6' },
-    conjugation: { icon: '✍️', color: '#8b5cf6' },
-    vocabulary: { icon: '📚', color: '#10b981' },
-    reading_comprehension: { icon: '📰', color: '#f59e0b' }
-  };
-
-  const getScoreClass = (score) => {
-    if (score >= 80) return 'excellent';
-    if (score >= 70) return 'good';
-    if (score >= 50) return 'average';
-    return 'poor';
-  };
-
   return (
-    <div className="category-stats-grid">
-      {progress.map((cat, index) => {
-        const categoryInfo = categoryIcons[cat.category_slug] || { icon: '📚', color: '#111111' };
-        const percentage = cat.completed_exercises > 0 
-          ? Math.round((cat.completed_exercises / cat.total_exercises) * 100) 
+    <div className="ds-cat-grid">
+      {progress.map((cat, i) => {
+        const m = CAT_META[cat.category_slug] || { color: '#4F46E5', bg: '#EEF2FF', icon: IcoBook };
+        const Icon = m.icon;
+        const completed = Math.min(Number(cat.completed_exercises || 0), Number(cat.total_exercises || 0));
+        const total = Number(cat.total_exercises || 0);
+        const pct = total > 0
+          ? Math.min(100, Math.round((completed / total) * 100))
           : 0;
+        const score = Math.round(cat.average_score || 0);
 
         return (
-          <div 
-            key={index} 
-            className="category-stat-card"
+          <div
+            key={i}
+            className="ds-cat-card"
             onClick={() => navigate(`/exercice/${cat.category_slug}/${cat.level}`)}
-            style={{ cursor: 'pointer' }}
+            tabIndex="0"
+            onKeyDown={e => e.key === 'Enter' && navigate(`/exercice/${cat.category_slug}/${cat.level}`)}
+            aria-label={`${cat.category_name} niveau ${cat.level} — score ${score}%`}
           >
-            <div className="category-header">
-              <div 
-                className="category-icon"
-                style={{ background: `${categoryInfo.color}15`, color: categoryInfo.color }}
-              >
-                {categoryInfo.icon}
+            <div className="ds-cat-card__head">
+              <div className="ds-cat-ico" style={{ background: m.bg, color: m.color }}>
+                <Icon />
               </div>
-              <div className="category-name">{cat.category_name}</div>
+              <div>
+                <p className="ds-cat-name">{cat.category_name}</p>
+                <p className="ds-cat-lvl">Niveau {cat.level}</p>
+              </div>
             </div>
-            
-            <div className="category-score">
-              {Math.round(cat.average_score || 0)}%
+
+            <div className="ds-cat-score-row">
+              <span className="ds-cat-score">{score}%</span>
+              <span className="ds-cat-count">{completed}/{total} exercices</span>
             </div>
-            
-            <div className="category-progress">
-              {cat.completed_exercises} / {cat.total_exercises} exercices • Niveau {cat.level}
-            </div>
-            
-            <div className="progress-bar-small">
-              <div 
-                className="progress-fill-small"
-                style={{ width: `${percentage}%`, background: categoryInfo.color }}
-              ></div>
+
+            <div className="ds-cat-bar">
+              <div
+                className="ds-cat-bar__fill"
+                style={{ width: `${pct}%`, background: m.color }}
+              />
             </div>
           </div>
         );

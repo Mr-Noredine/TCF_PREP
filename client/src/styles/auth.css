@@ -1,11 +1,11 @@
 /* ==================== LAYOUT SPLIT ==================== */
 .auth-section {
-    min-height: calc(100vh - 65px - 140px); /* viewport - header - footer */
+    min-height: calc(100vh - 60px - 100px);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 60px 40px;
-    background: #fafafa;
+    background: var(--off-white);
 }
 
 .auth-container {
@@ -13,10 +13,12 @@
     grid-template-columns: 1fr 1fr;
     max-width: 1100px;
     width: 100%;
-    background: #ffffff;
-    border: 1px solid #e5e5e5;
+    background: var(--white);
+    border: 1px solid var(--gray-100);
+    border-radius: 0;
     overflow: hidden;
     min-height: 620px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.1);
 }
 
 /* ==================== IMAGE CÔTÉ GAUCHE ==================== */
@@ -78,6 +80,38 @@
     justify-content: center;
 }
 
+/* ── Google button ── */
+.auth-google {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* Force Google button to full width */
+.auth-google > div,
+.auth-google iframe {
+    width: 100% !important;
+}
+
+/* ── Divider "ou" ── */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    color: var(--gray-400);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gray-200);
+}
+
 /* ── Tabs ── */
 .auth-tabs {
     display: flex;
@@ -106,7 +140,7 @@
 }
 
 .auth-tab.active {
-    color: #111111;
+    color: var(--black);
     font-weight: 700;
 }
 
@@ -118,7 +152,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: #111111;
+    background: var(--black);
 }
 
 /* ── Formulaire commune ── */
@@ -176,27 +210,28 @@
 .input-wrapper input,
 .input-wrapper select {
     width: 100%;
-    padding: 13px 14px 13px 42px;   /* left padding pour l'icône */
-    font-family: inherit;
+    padding: 13px 14px 13px 42px;
+    font-family: 'Inter', sans-serif;
     font-size: 0.92rem;
-    color: #111111;
-    background: #fafafa;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
-    transition: border-color 0.25s ease, background 0.25s ease;
+    color: var(--black);
+    background: var(--off-white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 0;
+    transition: border-color var(--dur-fast) var(--ease-sharp);
     outline: none;
     appearance: none;
     -webkit-appearance: none;
 }
 
 .input-wrapper input::placeholder {
-    color: #9ca3af;
+    color: var(--gray-400);
 }
 
 .input-wrapper input:focus,
 .input-wrapper select:focus {
-    border-color: #111111;
-    background: #ffffff;
+    border-color: var(--black);
+    background: var(--white);
+    box-shadow: none;
 }
 
 /* select : chevron personnalisé via l'icône SVG (déjà dans le HTML) */
@@ -292,8 +327,8 @@
 }
 
 .checkbox-label input:checked + .checkbox-custom {
-    background: #111111;
-    border-color: #111111;
+    background: var(--black);
+    border-color: var(--black);
 }
 
 /* tick mark via pseudo-element */
@@ -325,15 +360,16 @@
 
 /* ── Liens dans les termes ── */
 .terms-link {
-    color: #111111;
-    font-weight: 600;
+    color: var(--black);
+    font-weight: 700;
     text-decoration: none;
-    border-bottom: 1px solid #111111;
+    border-bottom: 1.5px solid var(--black);
+    transition: all var(--dur-fast) var(--ease-sharp);
 }
 
 .terms-link:hover {
-    color: #757575;
-    border-color: #757575;
+    color: var(--gray-600);
+    border-color: var(--gray-400);
 }
 
 /* ── Bouton plein largeur ── */
@@ -402,19 +438,19 @@
 .auth-switch .switch-tab {
     background: none;
     border: none;
-    font-family: inherit;
+    font-family: 'Inter', sans-serif;
     font-size: 0.85rem;
-    color: #111111;
-    font-weight: 600;
+    color: var(--black);
+    font-weight: 700;
     cursor: pointer;
     padding: 0;
-    border-bottom: 1.5px solid #111111;
-    transition: color 0.25s, border-color 0.25s;
+    border-bottom: 1.5px solid var(--black);
+    transition: all var(--dur-fast) var(--ease-sharp);
 }
 
 .auth-switch .switch-tab:hover {
-    color: #757575;
-    border-color: #757575;
+    color: var(--gray-600);
+    border-color: var(--gray-400);
 }
 
 /* ==================== RESPONSIVE ==================== */

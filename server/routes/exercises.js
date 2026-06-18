@@ -1,27 +1,32 @@
 import express from 'express';
 import {
   getAllExercises,
+  getExercisesWithStatus,
   getExercisesGrouped,
   getExerciseById,
   submitAttempt,
   getCategories
 } from '../controllers/exercisesController.js';
+import { protect, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// GET /api/exercises - Get all exercises (with filters)
-router.get('/', getAllExercises);
+// GET /api/exercises/list - Individual exercises with user status
+router.get('/list', optionalAuth, getExercisesWithStatus);
 
-// GET /api/exercises/grouped - Get exercises grouped by category/level
+// GET /api/exercises/grouped - Exercises grouped by category/level
 router.get('/grouped', getExercisesGrouped);
 
-// GET /api/exercises/categories - Get all categories
+// GET /api/exercises/categories - All categories
 router.get('/categories', getCategories);
 
-// GET /api/exercises/:id - Get single exercise
+// GET /api/exercises - All exercises (with filters)
+router.get('/', getAllExercises);
+
+// GET /api/exercises/:id - Single exercise
 router.get('/:id', getExerciseById);
 
-// POST /api/exercises/attempt - Submit exercise attempt
-router.post('/attempt', submitAttempt);
+// POST /api/exercises/attempt - Submit attempt (protected)
+router.post('/attempt', protect, submitAttempt);
 
 export default router;

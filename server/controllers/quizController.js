@@ -62,7 +62,8 @@ export const submitQuizAttempt = async (req, res) => {
   const client = await pool.connect();
   
   try {
-    const { userId, category, level, score, totalQuestions, percentage, timeSpent, answers } = req.body;
+    const userId = req.user.id; // From auth middleware
+    const { category, level, score, totalQuestions, percentage, timeSpent, answers } = req.body;
     
     await client.query('BEGIN');
     
@@ -81,12 +82,14 @@ export const submitQuizAttempt = async (req, res) => {
     // Insert quiz attempt (using exercise_attempts table)
     const attemptResult = await client.query(
       `INSERT INTO exercise_attempts (
-        user_id, exercise_id, score, max_score, percentage, time_spent, answers
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        user_id, exercise_id, category_id, level, score, max_score, percentage, time_spent, answers
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING id`,
       [
         userId,
         `quiz_${category}_${level}_${Date.now()}`, // Unique quiz ID
+        categoryId,
+        level,
         score,
         totalQuestions,
         percentage,

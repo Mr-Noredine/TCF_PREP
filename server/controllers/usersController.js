@@ -8,15 +8,27 @@ export const getUserProgress = async (req, res) => {
     const userId = req.user.id;
     
     const result = await pool.query(
-      `SELECT 
-        up.*,
+      `WITH best_attempts AS (
+        SELECT exercise_id, MAX(percentage)::NUMERIC AS best_percentage
+        FROM exercise_attempts
+        WHERE user_id = $1
+        GROUP BY exercise_id
+      )
+      SELECT
+        c.id as category_id,
         c.name as category_name,
         c.slug as category_slug,
-        c.icon_color
-      FROM user_progress up
-      JOIN categories c ON up.category_id = c.id
-      WHERE up.user_id = $1
-      ORDER BY c.name, up.level`,
+        c.icon_color,
+        e.level,
+        COUNT(DISTINCT e.id)::int as total_exercises,
+        COUNT(DISTINCT e.id) FILTER (WHERE ba.best_percentage IS NOT NULL)::int as completed_exercises,
+        COALESCE(AVG(ba.best_percentage) FILTER (WHERE ba.best_percentage IS NOT NULL), 0) as average_score
+      FROM exercises e
+      JOIN categories c ON e.category_id = c.id
+      LEFT JOIN best_attempts ba ON ba.exercise_id = e.id
+      GROUP BY c.id, c.name, c.slug, c.icon_color, e.level
+      HAVING COUNT(DISTINCT e.id) FILTER (WHERE ba.best_percentage IS NOT NULL) > 0
+      ORDER BY c.name, e.level`,
       [userId]
     );
     
@@ -46,12 +58,12 @@ export const getUserAttempts = async (req, res) => {
       `SELECT 
         ea.*,
         e.prompt as exercise_prompt,
-        e.level,
+        ea.level,
         c.name as category_name,
         c.slug as category_slug
       FROM exercise_attempts ea
       LEFT JOIN exercises e ON ea.exercise_id = e.id
-      LEFT JOIN categories c ON e.category_id = c.id
+      LEFT JOIN categories c ON ea.category_id = c.id
       WHERE ea.user_id = $1
       ORDER BY ea.completed_at DESC
       LIMIT $2 OFFSET $3`,
@@ -81,25 +93,41 @@ export const getUserStats = async (req, res) => {
     const userId = req.user.id;
     
     const stats = await pool.query(
-      `SELECT 
-        COUNT(DISTINCT exercise_id) as total_exercises_completed,
-        COUNT(*) as total_attempts,
-        AVG(percentage) as average_score,
-        SUM(time_spent) as total_time_spent
-      FROM exercise_attempts
-      WHERE user_id = $1`,
+      `WITH best_attempts AS (
+        SELECT exercise_id, MAX(percentage)::NUMERIC AS best_percentage
+        FROM exercise_attempts
+        WHERE user_id = $1
+        GROUP BY exercise_id
+      ), time_totals AS (
+        SELECT COALESCE(SUM(time_spent), 0) as total_time_spent,
+               COUNT(*) as total_attempts
+        FROM exercise_attempts
+        WHERE user_id = $1
+      )
+      SELECT
+        COUNT(*)::int as total_exercises_completed,
+        (SELECT total_attempts FROM time_totals)::int as total_attempts,
+        COALESCE(AVG(best_percentage), 0) as average_score,
+        (SELECT total_time_spent FROM time_totals) as total_time_spent,
+        COUNT(*) FILTER (WHERE best_percentage >= 70)::int as successful_count
+      FROM best_attempts`,
       [userId]
     );
     
     const categoryStats = await pool.query(
-      `SELECT 
+      `WITH best_attempts AS (
+        SELECT ea.exercise_id, MAX(ea.percentage)::NUMERIC AS best_percentage
+        FROM exercise_attempts ea
+        WHERE ea.user_id = $1
+        GROUP BY ea.exercise_id
+      )
+      SELECT
         c.name as category,
-        COUNT(*) as attempts,
-        AVG(ea.percentage) as avg_score
-      FROM exercise_attempts ea
-      JOIN exercises e ON ea.exercise_id = e.id
-      JOIN categories c ON e.category_id = c.id
-      WHERE ea.user_id = $1
+        COUNT(ba.exercise_id)::int as attempts,
+        COALESCE(AVG(ba.best_percentage), 0) as avg_score
+      FROM best_attempts ba
+      JOIN exercises e ON e.id = ba.exercise_id
+      JOIN categories c ON c.id = e.category_id
       GROUP BY c.name
       ORDER BY c.name`,
       [userId]
@@ -158,57 +186,56 @@ export const getRecommendations = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Get weak areas (categories with < 60% success rate)
+    const progressCte = `
+      WITH best_attempts AS (
+        SELECT exercise_id, MAX(percentage)::NUMERIC AS best_percentage
+        FROM exercise_attempts
+        WHERE user_id = $1
+        GROUP BY exercise_id
+      ), progress AS (
+        SELECT
+          c.name,
+          c.slug,
+          e.category_id,
+          e.level,
+          COUNT(DISTINCT e.id)::int as total_exercises,
+          COUNT(DISTINCT e.id) FILTER (WHERE ba.best_percentage IS NOT NULL)::int as completed_exercises,
+          COALESCE(AVG(ba.best_percentage) FILTER (WHERE ba.best_percentage IS NOT NULL), 0) as average_score
+        FROM exercises e
+        JOIN categories c ON c.id = e.category_id
+        LEFT JOIN best_attempts ba ON ba.exercise_id = e.id
+        GROUP BY c.name, c.slug, e.category_id, e.level
+      )
+    `;
+
     const weakAreasQuery = `
-      SELECT 
-        c.name,
-        c.slug,
-        up.level,
-        up.average_score,
-        up.completed_exercises,
-        up.total_exercises
-      FROM user_progress up
-      JOIN categories c ON up.category_id = c.id
-      WHERE up.user_id = $1
-        AND up.average_score < 60
-        AND up.completed_exercises > 0
-      ORDER BY up.average_score ASC
+      ${progressCte}
+      SELECT name, slug, level, average_score, completed_exercises, total_exercises
+      FROM progress
+      WHERE average_score < 60
+        AND completed_exercises > 0
+      ORDER BY average_score ASC
       LIMIT 3
     `;
 
-    // Get strong areas (categories with >= 80% success rate)
     const strongAreasQuery = `
-      SELECT 
-        c.name,
-        c.slug,
-        up.level,
-        up.average_score,
-        up.completed_exercises
-      FROM user_progress up
-      JOIN categories c ON up.category_id = c.id
-      WHERE up.user_id = $1
-        AND up.average_score >= 80
-        AND up.completed_exercises > 0
-      ORDER BY up.average_score DESC
+      ${progressCte}
+      SELECT name, slug, level, average_score, completed_exercises, total_exercises
+      FROM progress
+      WHERE average_score >= 80
+        AND completed_exercises > 0
+      ORDER BY average_score DESC
       LIMIT 3
     `;
 
-    // Get suggested next level
     const nextLevelQuery = `
-      SELECT 
-        c.name,
-        c.slug,
-        up.level,
-        up.average_score,
-        up.completed_exercises,
-        up.total_exercises
-      FROM user_progress up
-      JOIN categories c ON up.category_id = c.id
-      WHERE up.user_id = $1
-        AND up.average_score >= 75
-        AND up.completed_exercises >= (up.total_exercises * 0.8)
-      ORDER BY 
-        CASE up.level
+      ${progressCte}
+      SELECT name, slug, level, average_score, completed_exercises, total_exercises
+      FROM progress
+      WHERE average_score >= 75
+        AND completed_exercises >= 5
+      ORDER BY
+        CASE level
           WHEN 'A1' THEN 1
           WHEN 'A2' THEN 2
           WHEN 'B1' THEN 3

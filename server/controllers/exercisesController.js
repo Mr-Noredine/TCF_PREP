@@ -39,17 +39,23 @@ export const getAllExercises = async (req, res) => {
       paramCount++;
     }
     
-    query += ' ORDER BY e.level, e.difficulty';
-    
-    if (limit) {
+    const parsedLimit = parseInt(limit);
+    if (!isNaN(parsedLimit) && parsedLimit > 0) {
+      query += ' ORDER BY RANDOM()';
+    } else {
+      query += ' ORDER BY e.level, e.difficulty';
+    }
+
+    if (!isNaN(parsedLimit) && parsedLimit > 0) {
       query += ` LIMIT $${paramCount}`;
-      params.push(parseInt(limit));
+      params.push(parsedLimit);
       paramCount++;
     }
     
-    if (offset) {
+    const parsedOffset = parseInt(offset);
+    if (!isNaN(parsedOffset) && parsedOffset >= 0) {
       query += ` OFFSET $${paramCount}`;
-      params.push(parseInt(offset));
+      params.push(parsedOffset);
     }
     
     const result = await pool.query(query, params);
@@ -66,6 +72,69 @@ export const getAllExercises = async (req, res) => {
       success: false,
       message: 'Erreur lors de la récupération des exercices'
     });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// GET EXERCISES WITH USER STATUS (individual library view)
+// ═══════════════════════════════════════════════════════════
+export const getExercisesWithStatus = async (req, res) => {
+  try {
+    const { category, level, type } = req.query;
+    const userId = req.user?.id || null;
+
+    const params = [userId];
+    let paramCount = 2;
+    let conditions = 'WHERE 1=1';
+
+    if (category) {
+      conditions += ` AND c.slug = $${paramCount++}`;
+      params.push(category);
+    }
+    if (level) {
+      conditions += ` AND e.level = $${paramCount++}`;
+      params.push(level.toUpperCase());
+    }
+    if (type) {
+      conditions += ` AND e.type = $${paramCount++}`;
+      params.push(type);
+    }
+
+    const query = `
+      SELECT
+        e.id,
+        e.type,
+        e.level,
+        e.difficulty,
+        e.prompt,
+        e.context,
+        e.tags,
+        c.name  AS category_name,
+        c.slug  AS category_slug,
+        c.icon_color,
+        (SELECT MAX(percentage)::NUMERIC
+           FROM exercise_attempts
+          WHERE user_id = $1 AND exercise_id = e.id
+        ) AS last_score,
+        (SELECT MAX(percentage)::NUMERIC
+           FROM exercise_attempts
+          WHERE user_id = $1 AND exercise_id = e.id
+        ) AS best_score,
+        (SELECT COUNT(*)::int
+           FROM exercise_attempts
+          WHERE user_id = $1 AND exercise_id = e.id
+        ) AS attempt_count
+      FROM exercises e
+      JOIN categories c ON e.category_id = c.id
+      ${conditions}
+      ORDER BY c.name, e.level, e.difficulty
+    `;
+
+    const result = await pool.query(query, params);
+    res.json({ success: true, count: result.rows.length, data: result.rows });
+  } catch (error) {
+    console.error('Error fetching exercises with status:', error);
+    res.status(500).json({ success: false, message: 'Erreur lors de la récupération des exercices' });
   }
 };
 
@@ -167,34 +236,35 @@ export const submitAttempt = async (req, res) => {
   const client = await pool.connect();
   
   try {
-    const { userId, exerciseId, score, maxScore, percentage, timeSpent, answers } = req.body;
+    const userId = req.user.id; // From auth middleware
+    const { exerciseId, score, maxScore, percentage, timeSpent, answers } = req.body;
     
     await client.query('BEGIN');
     
-    // Insert attempt
-    const attemptResult = await client.query(
-      `INSERT INTO exercise_attempts (
-        user_id, exercise_id, score, max_score, percentage, time_spent, answers
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING id`,
-      [userId, exerciseId, score, maxScore, percentage, timeSpent, JSON.stringify(answers)]
-    );
-    
-    // Update user progress
-    const exercise = await client.query(
+    // Get exercise info to link category and level
+    const exerciseRes = await client.query(
       'SELECT category_id, level FROM exercises WHERE id = $1',
       [exerciseId]
     );
     
-    if (exercise.rows.length > 0) {
-      const { category_id, level } = exercise.rows[0];
-      
+    const { category_id = null, level = null } = exerciseRes.rows[0] || {};
+    
+    // Insert attempt
+    const attemptResult = await client.query(
+      `INSERT INTO exercise_attempts (
+        user_id, exercise_id, category_id, level, score, max_score, percentage, time_spent, answers
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id`,
+      [userId, exerciseId, category_id, level, score, maxScore, percentage, timeSpent, JSON.stringify(answers)]
+    );
+    
+    // Update user progress if exercise found
+    if (category_id && level) {
       await client.query(
-        `INSERT INTO user_progress (user_id, category_id, level, total_exercises, completed_exercises, average_score)
-         VALUES ($1, $2, $3, 1, 1, $4)
+        `INSERT INTO user_progress (user_id, category_id, level, completed_exercises, average_score)
+         VALUES ($1, $2, $3, 1, $4)
          ON CONFLICT (user_id, category_id, level)
          DO UPDATE SET
-           total_exercises = user_progress.total_exercises + 1,
            completed_exercises = user_progress.completed_exercises + 1,
            average_score = (user_progress.average_score * user_progress.completed_exercises + $4) / (user_progress.completed_exercises + 1),
            last_activity = CURRENT_TIMESTAMP`,

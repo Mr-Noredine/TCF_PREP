@@ -3,6 +3,78 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { exercisesService } from '../../services/exercisesService';
 import '../../styles/exerciceView.css';
 
+// ─── Shared results screen ────────────────────────────────────────────────────
+
+const ResultsScreen = ({ headline, percentage, circumference, targetOffset, theme, msg, score, total, onContinue, onRestart }) => {
+  const [circleOffset, setCircleOffset] = useState(circumference);
+  useEffect(() => {
+    const t = setTimeout(() => setCircleOffset(targetOffset), 120);
+    return () => clearTimeout(t);
+  }, [targetOffset]);
+
+  return (
+    <div className="exercise-view-container">
+      <div className="res-page">
+        <h1 className="res-headline">{headline}</h1>
+
+        <div className="results-score">
+          <svg width="200" height="200" className="score-circle-bg" aria-hidden="true">
+            <circle cx="100" cy="100" r="75" fill="none" stroke="#E6E9EF" strokeWidth="10" />
+            <circle
+              cx="100" cy="100" r="75"
+              fill="none"
+              strokeWidth="10"
+              strokeLinecap="round"
+              style={{
+                stroke: theme.stroke,
+                strokeDasharray: circumference,
+                strokeDashoffset: circleOffset,
+                transition: 'stroke-dashoffset 1.2s cubic-bezier(0,0,.2,1)',
+              }}
+            />
+          </svg>
+          <div className="score-text">
+            <span style={{ color: theme.color }}>{percentage}%</span>
+          </div>
+        </div>
+
+        <div className="res-msg" style={{ borderColor: theme.color, background: theme.bg }}>
+          <p className="res-msg__body">{msg}</p>
+        </div>
+
+        <div className="res-stats">
+          <div className="res-stat">
+            <span className="res-stat__num" style={{ color: '#15966B' }}>{score}</span>
+            <span className="res-stat__lbl">Correctes</span>
+          </div>
+          <div className="res-stat">
+            <span className="res-stat__num" style={{ color: '#DC2626' }}>{total - score}</span>
+            <span className="res-stat__lbl">Incorrectes</span>
+          </div>
+          <div className="res-stat">
+            <span className="res-stat__num">{total}</span>
+            <span className="res-stat__lbl">Questions</span>
+          </div>
+        </div>
+
+        <div className="res-actions">
+          <button className="btn-primary btn-large" onClick={onContinue}>
+            Continuer
+          </button>
+          <button className="res-link-btn" onClick={onContinue}>
+            Revoir mes erreurs
+          </button>
+        </div>
+        <button className="res-restart-link" onClick={onRestart}>
+          Recommencer
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ─── ExerciceView ─────────────────────────────────────────────────────────────
+
 const ExerciceView = () => {
   const { category, level } = useParams();
   const navigate = useNavigate();
@@ -16,10 +88,16 @@ const ExerciceView = () => {
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [startTime, setStartTime] = useState(Date.now());
 
   useEffect(() => {
     loadExercises();
   }, [category, level]);
+
+  // Reset timer when question changes
+  useEffect(() => {
+    setStartTime(Date.now());
+  }, [currentIndex]);
 
   const loadExercises = async () => {
     try {
@@ -39,7 +117,7 @@ const ExerciceView = () => {
   const currentExercise = exercises[currentIndex];
   const progress = exercises.length > 0 ? ((currentIndex + 1) / exercises.length) * 100 : 0;
 
-  const handleValidate = () => {
+  const handleValidate = async () => {
     if (!currentExercise) return;
 
     let correct = false;
@@ -68,14 +146,6 @@ const ExerciceView = () => {
       
       correct = selectedOption === correctIndex;
       
-      console.log('Validation:', {
-        selectedOption,
-        correctIndex,
-        correctAnswer,
-        choices,
-        isCorrect: correct
-      });
-      
     } else if (currentExercise.type === 'fill_blank') {
       const userAnswerClean = userAnswer.trim().toLowerCase();
       const correctAnswerClean = currentExercise.answer.trim().toLowerCase();
@@ -87,6 +157,22 @@ const ExerciceView = () => {
     
     if (correct) {
       setScore(score + 1);
+    }
+
+    // Save attempt to database with time tracking
+    const timeSpent = Math.max(1, Math.round((Date.now() - startTime) / 1000));
+    
+    try {
+      await exercisesService.submitAttempt({
+        exerciseId: currentExercise.id,
+        score: correct ? 1 : 0,
+        maxScore: 1,
+        percentage: correct ? 100 : 0,
+        timeSpent: timeSpent,
+        answers: currentExercise.type === 'mcq' ? { selectedOption } : { userAnswer }
+      });
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la tentative:', error);
     }
   };
 
@@ -143,69 +229,40 @@ const ExerciceView = () => {
 
   // Results View
   if (showResults) {
-    const percentage = Math.round((score / exercises.length) * 100);
+    const percentage  = exercises.length ? Math.round((score / exercises.length) * 100) : 0;
     const circumference = 2 * Math.PI * 75;
-    const offset = circumference - (percentage / 100) * circumference;
+    const targetOffset  = circumference - (percentage / 100) * circumference;
+
+    const theme = percentage >= 70
+      ? { stroke: '#15966B', color: '#15966B', bg: '#EDFBF5' }
+      : percentage >= 40
+        ? { stroke: '#4338CA', color: '#4338CA', bg: '#EEF0FB' }
+        : { stroke: '#D97706', color: '#D97706', bg: '#FEF8EC' };
+
+    const headline = percentage >= 90 ? `${score} / ${exercises.length} — Excellent !`
+      : percentage >= 70 ? `${score} / ${exercises.length} — Bien joué !`
+      : percentage >= 40 ? `${score} / ${exercises.length} — Continuez !`
+      : `${score} / ${exercises.length} — Ne lâchez pas !`;
+
+    const msg = percentage >= 70
+      ? 'Belle performance ! Continuez à pratiquer pour consolider vos acquis.'
+      : percentage >= 40
+        ? "C'est un bon début. Retentez ce niveau pour consolider vos acquis."
+        : 'Ce niveau est exigeant. Revenez sur les explications et retentez pour voir votre progression.';
 
     return (
-      <div className="exercise-view-container">
-        <div className="results-container">
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', color: '#111111' }}>
-            Résultats
-          </h1>
-
-          <div className="results-score">
-            <svg width="200" height="200" className="score-circle-bg">
-              <circle cx="100" cy="100" r="75" stroke="#e5e5e5" strokeWidth="12" fill="none" />
-              <circle 
-                cx="100" 
-                cy="100" 
-                r="75" 
-                stroke="#111111" 
-                strokeWidth="12" 
-                fill="none"
-                strokeDasharray={circumference}
-                strokeDashoffset={offset}
-                strokeLinecap="round"
-                className="score-circle"
-              />
-            </svg>
-            <div className="score-text">
-              {percentage}%
-              <div className="score-label">Score</div>
-            </div>
-          </div>
-
-          <div className="results-stats">
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: '#10b981' }}>{score}</div>
-              <div className="stat-label">Correct</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value" style={{ color: '#ef4444' }}>
-                {exercises.length - score}
-              </div>
-              <div className="stat-label">Incorrect</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{exercises.length}</div>
-              <div className="stat-label">Total</div>
-            </div>
-          </div>
-
-          <div className="results-actions">
-            <button onClick={handleRestart} className="btn-primary btn-large">
-              Recommencer
-            </button>
-            <button 
-              onClick={() => navigate('/exercices')} 
-              className="btn-secondary btn-large"
-            >
-              Autres exercices
-            </button>
-          </div>
-        </div>
-      </div>
+      <ResultsScreen
+        headline={headline}
+        percentage={percentage}
+        circumference={circumference}
+        targetOffset={targetOffset}
+        theme={theme}
+        msg={msg}
+        score={score}
+        total={exercises.length}
+        onContinue={() => navigate('/exercices')}
+        onRestart={handleRestart}
+      />
     );
   }
 
@@ -234,21 +291,17 @@ const ExerciceView = () => {
 
   return (
     <div className="exercise-view-container">
-      {/* Header */}
-      <div className="exercise-header">
-        <h1>{currentExercise?.category_name} - Niveau {currentExercise?.level}</h1>
-        <p>Exercice {currentIndex + 1} sur {exercises.length}</p>
+      {/* Question counter + progress */}
+      <div className="ev-topbar">
+        <button className="ev-back" onClick={() => navigate('/exercices')}>
+          Quitter
+        </button>
+        <span className="ev-breadcrumb">
+          <span className="ev-pos">Question {currentIndex + 1} / {exercises.length}</span>
+        </span>
       </div>
-
-      {/* Progress Bar */}
-      <div className="progress-container">
-        <div className="progress-info">
-          <span className="progress-text">Progression</span>
-          <span className="progress-text">{Math.round(progress)}%</span>
-        </div>
-        <div className="progress-bar-bg">
-          <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
-        </div>
+      <div className="ev-progress">
+        <div className="ev-progress__fill" style={{ width: `${progress}%`, background: 'var(--primary)' }} />
       </div>
 
       {/* Question Card */}
@@ -288,10 +341,12 @@ const ExerciceView = () => {
                   className += ' selected';
                 }
 
+                const labels = ['A', 'B', 'C', 'D'];
                 return (
                   <button
                     key={index}
                     className={className}
+                    data-index={labels[index] || index + 1}
                     onClick={() => !showFeedback && setSelectedOption(index)}
                   >
                     {choice}
@@ -334,10 +389,6 @@ const ExerciceView = () => {
 
       {/* Actions */}
       <div className="exercise-actions">
-        <button className="btn-quit" onClick={() => navigate('/exercices')}>
-          Quitter
-        </button>
-        
         {!showFeedback ? (
           <button 
             className="btn-validate"

@@ -1,143 +1,156 @@
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import '../../styles/exerciceView.css'; // Réutilise les styles results
+import { quizService } from '../../services/quizService';
+import '../../styles/exerciceView.css';
 
 const QuizResults = () => {
   const location = useLocation();
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
   const { score, total, category, level, timeElapsed } = location.state || {};
+  const [hasSaved, setHasSaved] = useState(false);
+
+  const percentage = total ? Math.round((score / total) * 100) : 0;
+  const circumference = 2 * Math.PI * 75;
+  const targetOffset  = circumference - (percentage / 100) * circumference;
+
+  // Animate the arc after mount
+  const [circleOffset, setCircleOffset] = useState(circumference);
+  useEffect(() => {
+    const t = setTimeout(() => setCircleOffset(targetOffset), 120);
+    return () => clearTimeout(t);
+  }, [targetOffset]);
+
+  useEffect(() => {
+    if (score !== undefined && total && category && level && !hasSaved) {
+      saveResult();
+    }
+  }, [score, total, category, level, hasSaved]);
+
+  const saveResult = async () => {
+    try {
+      await quizService.submitAttempt({
+        category: category.slug,
+        level,
+        score,
+        totalQuestions: total,
+        percentage,
+        timeSpent: timeElapsed,
+        answers: {},
+      });
+      setHasSaved(true);
+    } catch (err) {
+      console.error('Erreur sauvegarde:', err);
+    }
+  };
 
   if (!score && score !== 0) {
     navigate('/quiz');
     return null;
   }
 
-  const percentage = Math.round((score / total) * 100);
-  const circumference = 2 * Math.PI * 75;
-  const offset = circumference - (percentage / 100) * circumference;
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}min ${secs}s`;
+  const formatTime = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m > 0 ? `${m}min ${sec}s` : `${sec}s`;
   };
 
-  const getMessage = () => {
-    if (percentage >= 90) return {
-      title: 'Excellent !',
-      message: 'Vous maîtrisez parfaitement ce niveau. Passez au niveau supérieur !'
-    };
-    if (percentage >= 70) return {
-      title: 'Très bien !',
-      message: 'Bonne maîtrise du niveau. Continuez à vous entraîner.'
-    };
-    if (percentage >= 50) return {
-      title: 'Bien !',
-      message: 'Vous êtes sur la bonne voie. Quelques révisions et ce sera parfait !'
-    };
-    return {
-      title: 'Continuez vos efforts !',
-      message: 'Revoyez les bases de ce niveau et refaites le quiz.'
-    };
-  };
+  // Theme: vert ≥70%, indigo 40-69%, ambre <40%
+  const theme = percentage >= 70
+    ? { stroke: '#15966B', color: '#15966B', bg: '#EDFBF5' }
+    : percentage >= 40
+      ? { stroke: '#4338CA', color: '#4338CA', bg: '#EEF0FB' }
+      : { stroke: '#D97706', color: '#D97706', bg: '#FEF8EC' };
 
-  const message = getMessage();
+  const headline = percentage >= 90 ? `${score} / ${total} — Excellent !`
+    : percentage >= 70 ? `${score} / ${total} — Bien joué !`
+    : percentage >= 40 ? `${score} / ${total} — Continuez !`
+    : `${score} / ${total} — Ne lâchez pas !`;
+
+  const msg = percentage >= 90
+    ? { title: 'Maîtrise parfaite', body: "Vous dominez ce niveau. C'est le moment de passer au niveau suivant." }
+    : percentage >= 70
+      ? { title: 'Très bonne performance', body: 'Quelques points à consolider, mais vous êtes clairement sur la bonne voie.' }
+      : percentage >= 40
+        ? { title: 'Bonne progression', body: "Retentez ce niveau pour consolider vos acquis — chaque essai compte." }
+        : { title: 'Ne vous découragez pas', body: 'Revenez sur les explications de chaque réponse et retentez pour mesurer votre progression.' };
+
+  const isLevelUp = percentage >= 70;
+  const NEXT = { A1: 'A2', A2: 'B1', B1: 'B2', B2: 'C1', C1: 'C2' };
 
   return (
     <div className="exercise-view-container">
-      <div className="results-container">
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#111111' }}>
-          Quiz Terminé !
-        </h1>
-        <p style={{ fontSize: '1.1rem', color: '#757575', marginBottom: '3rem' }}>
-          {category?.name} • Niveau {level}
-        </p>
+      <div className="res-page">
 
-        {/* Score Circle */}
+        {/* Headline */}
+        <h1 className="res-headline">{headline}</h1>
+        <p className="res-meta">{category?.name} · Niveau {level}</p>
+
+        {/* Animated score circle */}
         <div className="results-score">
-          <svg width="200" height="200" className="score-circle-bg">
-            <circle cx="100" cy="100" r="75" stroke="#e5e5e5" strokeWidth="12" fill="none" />
-            <circle 
-              cx="100" 
-              cy="100" 
-              r="75" 
-              stroke="#111111" 
-              strokeWidth="12" 
+          <svg width="200" height="200" className="score-circle-bg" aria-hidden="true">
+            <circle cx="100" cy="100" r="75" fill="none" stroke="#E6E9EF" strokeWidth="10" />
+            <circle
+              cx="100" cy="100" r="75"
               fill="none"
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
+              strokeWidth="10"
               strokeLinecap="round"
-              className="score-circle"
+              style={{
+                stroke: theme.stroke,
+                strokeDasharray: circumference,
+                strokeDashoffset: circleOffset,
+                transition: 'stroke-dashoffset 1.2s cubic-bezier(0,0,.2,1)',
+              }}
             />
           </svg>
           <div className="score-text">
-            {percentage}%
-            <div className="score-label">Score</div>
+            <span style={{ color: theme.color }}>{percentage}%</span>
           </div>
         </div>
 
-        {/* Message */}
-        <div style={{ 
-          textAlign: 'center', 
-          margin: '2rem 0 3rem',
-          padding: '2rem',
-          background: '#fafafa',
-          borderRadius: '12px'
-        }}>
-          <h3 style={{ fontSize: '1.5rem', color: '#111111', marginBottom: '0.5rem' }}>
-            {message.title}
-          </h3>
-          <p style={{ fontSize: '1rem', color: '#757575' }}>
-            {message.message}
+        {/* Level-up callout */}
+        {isLevelUp && NEXT[level] && (
+          <p className="res-levelup">
+            Seuil atteint — vous pouvez passer au niveau <strong>{NEXT[level]}</strong> !
           </p>
+        )}
+
+        {/* Message block */}
+        <div className="res-msg" style={{ borderColor: theme.color, background: theme.bg }}>
+          <p className="res-msg__title">{msg.title}</p>
+          <p className="res-msg__body">{msg.body}</p>
         </div>
 
-        {/* Stats */}
-        <div className="results-stats">
-          <div className="stat-card">
-            <div className="stat-value" style={{ color: '#10b981' }}>{score}</div>
-            <div className="stat-label">Correct</div>
+        {/* Stats row */}
+        <div className="res-stats">
+          <div className="res-stat">
+            <span className="res-stat__num" style={{ color: '#15966B' }}>{score}</span>
+            <span className="res-stat__lbl">Correctes</span>
           </div>
-          <div className="stat-card">
-            <div className="stat-value" style={{ color: '#ef4444' }}>
-              {total - score}
+          <div className="res-stat">
+            <span className="res-stat__num" style={{ color: '#DC2626' }}>{total - score}</span>
+            <span className="res-stat__lbl">Incorrectes</span>
+          </div>
+          {timeElapsed > 0 && (
+            <div className="res-stat">
+              <span className="res-stat__num">{formatTime(timeElapsed)}</span>
+              <span className="res-stat__lbl">Temps</span>
             </div>
-            <div className="stat-label">Incorrect</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">{total}</div>
-            <div className="stat-label">Questions</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value" style={{ fontSize: '1.5rem' }}>
-              {formatTime(timeElapsed)}
-            </div>
-            <div className="stat-label">Temps</div>
-          </div>
+          )}
         </div>
 
-        {/* Actions */}
-        <div className="results-actions">
-          <button 
-            onClick={() => navigate('/quiz', { 
-              state: { category, level } 
-            })} 
-            className="btn-primary btn-large"
-          >
-            Recommencer
+        {/* Actions — 2 max */}
+        <div className="res-actions">
+          <button className="btn-primary btn-large" onClick={() => navigate('/exercices')}>
+            Continuer
           </button>
-          <button 
-            onClick={() => navigate('/quiz')} 
-            className="btn-secondary btn-large"
-          >
-            Nouveau quiz
-          </button>
-          <button 
-            onClick={() => navigate('/exercices')} 
-            className="btn-secondary btn-large"
-          >
-            Exercices
+          <button className="res-link-btn" onClick={() => navigate('/exercices')}>
+            Revoir mes erreurs
           </button>
         </div>
+
+        <button className="res-restart-link" onClick={() => navigate('/quiz', { state: { category, level } })}>
+          Recommencer ce niveau
+        </button>
       </div>
     </div>
   );

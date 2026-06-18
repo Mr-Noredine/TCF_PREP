@@ -19,6 +19,20 @@ export const exercisesService = {
     }
   },
 
+  // Get individual exercises with user status (new library view)
+  getList: async (filters = {}) => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.category) params.append('category', filters.category);
+      if (filters.level)    params.append('level', filters.level);
+      if (filters.type)     params.append('type', filters.type);
+      const response = await axios.get(`${API_URL}/list?${params}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
   // Get exercises grouped by category and level
   getGrouped: async () => {
     try {

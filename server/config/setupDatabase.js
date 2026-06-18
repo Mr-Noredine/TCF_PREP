@@ -61,7 +61,9 @@ const setupDatabase = async () => {
       CREATE TABLE IF NOT EXISTS exercise_attempts (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        exercise_id VARCHAR(100) REFERENCES exercises(id) ON DELETE CASCADE,
+        exercise_id VARCHAR(100),
+        category_id INTEGER REFERENCES categories(id),
+        level VARCHAR(10),
         score INTEGER NOT NULL,
         max_score INTEGER NOT NULL,
         percentage DECIMAL(5,2),
