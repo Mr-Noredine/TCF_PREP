@@ -10,7 +10,8 @@
     "db:setup": "node config/setupDatabase.js",
     "db:seed": "node config/seedDatabase.js",
     "db:migrate-google": "node config/migrateGoogleAuth.js",
-    "db:migrate-examens": "node config/migrateExamens.js"
+    "db:migrate-examens": "node config/migrateExamens.js",
+    "db:migrate-all": "node config/migrateAll.js"
   },
   "keywords": [
     "tcf",
