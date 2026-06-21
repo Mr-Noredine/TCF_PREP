@@ -1,14 +1,12 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useExerciseCount } from '../../hooks/useExerciseCount';
 
 const Footer = () => {
-  const [total, setTotal] = useState(null);
+  const { count, loading, error } = useExerciseCount();
 
-  useEffect(() => {
-    axios.get('/api/exercises/count')
-      .then(r => setTotal(r.data.total))
-      .catch(() => {});
-  }, []);
+  let countText;
+  if (loading) countText = 'niveaux A1 à C2';
+  else if (error) countText = '600+ questions';
+  else countText = `${count} questions`;
 
   return (
     <footer>
@@ -18,8 +16,7 @@ const Footer = () => {
           <p>Créé par <strong>MOHAMMEDI Noureddine</strong></p>
         </div>
         <p className="footer-legal">
-          Plateforme de préparation à l'examen TCF —{' '}
-          {total !== null ? `${total} questions` : 'niveaux A1 à C2'}, 100&nbsp;% gratuit.
+          Plateforme de préparation à l'examen TCF — {countText}, 100&nbsp;% gratuit.
         </p>
       </div>
     </footer>

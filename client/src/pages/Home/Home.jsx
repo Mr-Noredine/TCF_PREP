@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { useExerciseCount } from '../../hooks/useExerciseCount';
 import '../../styles/home.css';
 
 const IcoArrow = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
@@ -25,15 +24,7 @@ const steps = [
 ];
 
 const Home = () => {
-  const [exerciseCount, setExerciseCount] = useState(null);
-
-  useEffect(() => {
-    let mounted = true;
-    axios.get('/api/exercises/count')
-      .then(res => { if (mounted) setExerciseCount(res.data.total); })
-      .catch(() => { if (mounted) setExerciseCount(null); });
-    return () => { mounted = false; };
-  }, []);
+  const { count: exerciseCount, loading: countLoading, error: countError } = useExerciseCount();
 
   return (
     <div className="landing">
@@ -54,7 +45,13 @@ const Home = () => {
 
       <section className="landing-proof" aria-label="Chiffres clés">
         <div className="landing-proof__inner">
-          <div><strong>{exerciseCount ?? '—'}</strong><span>exercices</span></div>
+          <div>
+            {countLoading
+              ? <strong className="count-skeleton" aria-hidden="true" />
+              : <strong>{countError ? '600+' : exerciseCount}</strong>
+            }
+            <span>exercices</span>
+          </div>
           <div><strong>5</strong><span>catégories</span></div>
           <div><strong>6</strong><span>niveaux A1-C2</span></div>
           <div><strong>2</strong><span>formats d’examen blanc</span></div>

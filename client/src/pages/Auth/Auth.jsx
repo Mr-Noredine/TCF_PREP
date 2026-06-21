@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../contexts/AuthContext';
+import { useExerciseCount } from '../../hooks/useExerciseCount';
 import '../../styles/auth.css';
 
 
@@ -20,6 +21,7 @@ const Auth = () => {
   }, [initialMode]);
   const { login, loginWithGoogle, register } = useAuth();
   const hasGoogleAuth = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+  const { count: exerciseCount, loading: countLoading, error: countError } = useExerciseCount();
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setLoading(true);
@@ -92,18 +94,26 @@ const Auth = () => {
 
   return (
     <main>
+      <h1 className="sr-only">
+        {activeTab === 'login' ? 'Connexion' : 'Créer un compte'}
+      </h1>
       <section className="auth-section">
         <div className="auth-container">
           <div className="auth-image">
             <img
               src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800"
-              alt="Étudiant"
+              alt="Étudiant qui prépare son examen"
               loading="lazy"
             />
             <div className="auth-image-overlay"></div>
             <div className="auth-image-text">
               <h2>Commencez votre parcours</h2>
-              <p>240 questions · 4 catégories · niveaux A1 à C2 · 100 % gratuit.</p>
+              <p>
+                {countLoading
+                  ? <>… questions · 5 catégories · niveaux A1 à C2 · 100&nbsp;% gratuit.</>
+                  : <>{countError ? '600+' : exerciseCount} questions · 5 catégories · niveaux A1 à C2 · 100&nbsp;% gratuit.</>
+                }
+              </p>
             </div>
           </div>
 
@@ -227,10 +237,12 @@ const Auth = () => {
               <form className="auth-form" onSubmit={handleRegisterSubmit}>
                 <div className="form-row-two">
                   <div className="form-group">
-                    <label>Prénom</label>
+                    <label htmlFor="reg-firstname">Prénom</label>
                     <div className="input-wrapper">
                       <input
                         type="text"
+                        id="reg-firstname"
+                        autoComplete="given-name"
                         required
                         value={registerData.firstname}
                         onChange={(e) => setRegisterData({ ...registerData, firstname: e.target.value })}
@@ -238,10 +250,12 @@ const Auth = () => {
                     </div>
                   </div>
                   <div className="form-group">
-                    <label>Nom</label>
+                    <label htmlFor="reg-lastname">Nom</label>
                     <div className="input-wrapper">
                       <input
                         type="text"
+                        id="reg-lastname"
+                        autoComplete="family-name"
                         required
                         value={registerData.lastname}
                         onChange={(e) => setRegisterData({ ...registerData, lastname: e.target.value })}
@@ -251,10 +265,12 @@ const Auth = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Email</label>
+                  <label htmlFor="reg-email">Email</label>
                   <div className="input-wrapper">
                     <input
                       type="email"
+                      id="reg-email"
+                      autoComplete="email"
                       required
                       value={registerData.email}
                       onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
@@ -263,10 +279,12 @@ const Auth = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Mot de passe</label>
+                  <label htmlFor="reg-password">Mot de passe</label>
                   <div className="input-wrapper">
                     <input
                       type={showPassword ? 'text' : 'password'}
+                      id="reg-password"
+                      autoComplete="new-password"
                       required
                       value={registerData.password}
                       onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
@@ -288,9 +306,10 @@ const Auth = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Niveau actuel</label>
+                  <label htmlFor="reg-level">Niveau actuel</label>
                   <div className="input-wrapper select-wrapper">
                     <select
+                      id="reg-level"
                       value={registerData.level}
                       onChange={(e) => setRegisterData({ ...registerData, level: e.target.value })}
                     >
