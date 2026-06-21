@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import heroPreview from '../../assets/landing-tcf-preview.png';
 import '../../styles/home.css';
 
 const IcoArrow = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
@@ -38,7 +37,7 @@ const Home = () => {
 
   return (
     <div className="landing">
-      <section className="landing-hero" style={{ '--hero-image': `url(${heroPreview})` }} aria-labelledby="landing-title">
+      <section className="landing-hero" aria-labelledby="landing-title">
         <div className="landing-hero__overlay" />
         <div className="landing-hero__inner">
           <p className="landing-eyebrow">Préparation TCF · A1 à C2</p>
