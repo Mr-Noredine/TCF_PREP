@@ -49,6 +49,48 @@ export function summarizeExercises(exercises = []) {
   return summary;
 }
 
+export function summarizeByCategory(exercises = []) {
+  const groups = new Map();
+
+  exercises.forEach(exercise => {
+    const key = exercise.category_slug || 'unknown';
+    if (!groups.has(key)) {
+      groups.set(key, {
+        category_name:      exercise.category_name,
+        category_slug:      exercise.category_slug,
+        icon_color:         exercise.icon_color,
+        total_exercises:    0,
+        completed_exercises: 0,
+        average_score:      0,
+        done:    0,
+        review:  0,
+        todo:    0,
+      });
+    }
+
+    const group  = groups.get(key);
+    const status = getExerciseStatus(exercise);
+    const score  = getExerciseBestScore(exercise);
+
+    group.total_exercises += 1;
+    if (status === STATUS.DONE)        group.done   += 1;
+    else if (status === STATUS.REVIEW) group.review += 1;
+    else                               group.todo   += 1;
+
+    if (score !== null) {
+      group.completed_exercises += 1;
+      group.average_score       += score;
+    }
+  });
+
+  return Array.from(groups.values()).map(group => ({
+    ...group,
+    average_score: group.completed_exercises > 0
+      ? group.average_score / group.completed_exercises
+      : 0,
+  }));
+}
+
 export function summarizeByCategoryLevel(exercises = []) {
   const groups = new Map();
 

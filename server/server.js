@@ -10,6 +10,7 @@ import exercisesRoutes from './routes/exercises.js';
 import quizRoutes from './routes/quiz.js';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
+import examensRoutes from './routes/examens.js';
 
 // Load environment variables
 dotenv.config();
@@ -76,6 +77,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/exercises', exercisesRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/examens', examensRoutes);
 
 // 404 handler
 app.use((req, res) => {

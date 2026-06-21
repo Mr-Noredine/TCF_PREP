@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { exercisesService } from '../../services/exercisesService';
+import AnswerExplanation from '../../components/AnswerExplanation/AnswerExplanation';
 import '../../styles/exerciceView.css';
 
 // ─── Shared results screen ────────────────────────────────────────────────────
@@ -372,19 +373,24 @@ const ExerciceView = () => {
         )}
 
         {/* Feedback */}
-        {showFeedback && (
-          <div className={`feedback-zone ${isCorrect ? 'correct' : 'incorrect'}`}>
-            <div className="feedback-icon">{isCorrect ? '✓' : '✗'}</div>
-            <div className="feedback-content">
-              <div className="feedback-title">
-                {isCorrect ? 'Correct !' : 'Incorrect'}
-              </div>
-              <div className="feedback-explanation">
-                {currentExercise?.explanation}
+        <div role="status" aria-live="polite" aria-atomic="true">
+          {showFeedback && (
+            <div className={`feedback-zone ${isCorrect ? 'correct' : 'incorrect'}`}>
+              <div className="feedback-icon">{isCorrect ? '✓' : '✗'}</div>
+              <div className="feedback-content">
+                <div className="feedback-title">
+                  {isCorrect ? 'Correct !' : 'Incorrect'}
+                </div>
+                <div className="feedback-explanation">
+                  <AnswerExplanation
+                    explanation={currentExercise?.explanation}
+                    distractors={currentExercise?.distractors}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Actions */}

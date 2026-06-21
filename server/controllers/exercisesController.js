@@ -1,15 +1,105 @@
 import pool from '../config/database.js';
 
+function splitContextLines(context) {
+  return String(context || '')
+    .split(/\r?\n|\s{2,}/)
+    .map(line => line.trim())
+    .filter(Boolean);
+}
+
+function supportFromContext(row) {
+  if (row.support || !row.context || !row.docType) return row.support || null;
+
+  const lines = splitContextLines(row.context);
+  const fallbackTitle = row.docType
+    .replace(/_/g, ' ')
+    .replace(/^\w/, c => c.toUpperCase());
+
+  if (row.docType === 'sms') {
+    const first = lines[0] || 'Message';
+    const fromMatch = first.match(/^(?:De\s*:\s*)?([^:]{2,30})\s*:\s*(.+)$/i);
+    return {
+      kind: 'sms',
+      visual: null,
+      message: {
+        from: fromMatch ? fromMatch[1].trim() : 'Message',
+        subject: null,
+        lines: fromMatch ? [fromMatch[2].trim(), ...lines.slice(1)] : lines,
+      },
+      audio: null,
+    };
+  }
+
+  if (row.docType === 'courriel' || row.docType === 'lettre' || row.docType === 'article') {
+    let from = row.docType === 'article' ? 'Document' : 'Expéditeur';
+    let subject = null;
+    const body = [];
+
+    for (const line of lines) {
+      const fromMatch = line.match(/^De\s*:\s*(.+)$/i);
+      const subjectMatch = line.match(/^(?:Objet|Sujet)\s*:\s*(.+)$/i);
+      if (fromMatch) from = fromMatch[1].trim();
+      else if (subjectMatch) subject = subjectMatch[1].trim();
+      else body.push(line);
+    }
+
+    return {
+      kind: row.docType,
+      visual: null,
+      message: { from, subject, lines: body.length ? body : lines },
+      audio: null,
+    };
+  }
+
+  const visualKind = row.docType === 'panneau' ? 'panneau'
+    : row.docType === 'affiche' ? 'affiche'
+      : 'annonce';
+  const style = row.docType === 'horaire' ? 'transport'
+    : row.docType === 'menu' || row.docType === 'publicite' ? 'commercial'
+      : 'administratif';
+
+  return {
+    kind: visualKind,
+    visual: {
+      title: DOC_TYPE_TITLES[row.docType] || fallbackTitle,
+      body: lines,
+      meta: null,
+      style,
+    },
+    message: null,
+    audio: null,
+  };
+}
+
+const DOC_TYPE_TITLES = {
+  affiche: 'Affiche',
+  annonce: 'Annonce',
+  panneau: 'Panneau',
+  menu: 'Menu',
+  horaire: 'Horaire',
+  document_administratif: 'Document administratif',
+  publicite: 'Publicité',
+};
+
+function publicExercise(row) {
+  return {
+    ...row,
+    support: supportFromContext(row),
+  };
+}
+
+
 // ═══════════════════════════════════════════════════════════
 // GET ALL EXERCISES (avec filtres)
 // ═══════════════════════════════════════════════════════════
 export const getAllExercises = async (req, res) => {
   try {
-    const { category, level, type, limit, offset } = req.query;
+    const { category, level, type, docType, limit, offset } = req.query;
     
     let query = `
       SELECT 
         e.*,
+        e.doc_type AS "docType",
         c.name as category_name,
         c.slug as category_slug,
         c.icon_color
@@ -38,6 +128,12 @@ export const getAllExercises = async (req, res) => {
       params.push(type);
       paramCount++;
     }
+
+    if (docType) {
+      query += ` AND e.doc_type = $${paramCount}`;
+      params.push(docType);
+      paramCount++;
+    }
     
     const parsedLimit = parseInt(limit);
     if (!isNaN(parsedLimit) && parsedLimit > 0) {
@@ -63,7 +159,7 @@ export const getAllExercises = async (req, res) => {
     res.json({
       success: true,
       count: result.rows.length,
-      data: result.rows
+      data: result.rows.map(publicExercise)
     });
     
   } catch (error) {
@@ -80,7 +176,7 @@ export const getAllExercises = async (req, res) => {
 // ═══════════════════════════════════════════════════════════
 export const getExercisesWithStatus = async (req, res) => {
   try {
-    const { category, level, type } = req.query;
+    const { category, level, type, docType } = req.query;
     const userId = req.user?.id || null;
 
     const params = [userId];
@@ -99,6 +195,10 @@ export const getExercisesWithStatus = async (req, res) => {
       conditions += ` AND e.type = $${paramCount++}`;
       params.push(type);
     }
+    if (docType) {
+      conditions += ` AND e.doc_type = $${paramCount++}`;
+      params.push(docType);
+    }
 
     const query = `
       SELECT
@@ -108,6 +208,8 @@ export const getExercisesWithStatus = async (req, res) => {
         e.difficulty,
         e.prompt,
         e.context,
+        e.support,
+        e.doc_type AS "docType",
         e.tags,
         c.name  AS category_name,
         c.slug  AS category_slug,
@@ -131,7 +233,7 @@ export const getExercisesWithStatus = async (req, res) => {
     `;
 
     const result = await pool.query(query, params);
-    res.json({ success: true, count: result.rows.length, data: result.rows });
+    res.json({ success: true, count: result.rows.length, data: result.rows.map(publicExercise) });
   } catch (error) {
     console.error('Error fetching exercises with status:', error);
     res.status(500).json({ success: false, message: 'Erreur lors de la récupération des exercices' });
@@ -190,6 +292,19 @@ export const getExercisesGrouped = async (req, res) => {
 };
 
 // ═══════════════════════════════════════════════════════════
+// GET EXERCISE COUNT (public — used by Footer)
+// ═══════════════════════════════════════════════════════════
+export const getExerciseCount = async (req, res) => {
+  try {
+    const result = await pool.query('SELECT COUNT(*)::int AS total FROM exercises');
+    res.json({ success: true, total: result.rows[0].total });
+  } catch (error) {
+    console.error('Error counting exercises:', error);
+    res.status(500).json({ success: false, total: 0 });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
 // GET SINGLE EXERCISE BY ID
 // ═══════════════════════════════════════════════════════════
 export const getExerciseById = async (req, res) => {
@@ -199,6 +314,7 @@ export const getExerciseById = async (req, res) => {
     const result = await pool.query(
       `SELECT 
         e.*,
+        e.doc_type AS "docType",
         c.name as category_name,
         c.slug as category_slug,
         c.icon_color
@@ -217,7 +333,7 @@ export const getExerciseById = async (req, res) => {
     
     res.json({
       success: true,
-      data: result.rows[0]
+      data: publicExercise(result.rows[0])
     });
     
   } catch (error) {

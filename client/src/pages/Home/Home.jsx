@@ -1,340 +1,127 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import axios from 'axios';
+import heroPreview from '../../assets/landing-tcf-preview.png';
 import '../../styles/home.css';
 
-// ─── SVG Icons ────────────────────────────────────────────────────────────────
+const IcoArrow = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
+const IcoClock = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+const IcoTarget = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
+const IcoFile = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>;
+const IcoMic = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>;
+const IcoRefresh = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>;
+const IcoCheck = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>;
 
-const IcoFileText = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/>
-    <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-    <polyline points="10 9 9 9 8 9"/>
-  </svg>
-);
-const IcoBook = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-  </svg>
-);
-const IcoEdit = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
-  </svg>
-);
-const IcoLibrary = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-  </svg>
-);
-const IcoArrow = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-  </svg>
-);
-const IcoLayers = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-    <polyline points="2 17 12 22 22 17"/>
-    <polyline points="2 12 12 17 22 12"/>
-  </svg>
-);
-const IcoCheck = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22 4 12 14.01 9 11.01"/>
-  </svg>
-);
-const IcoChart = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-  </svg>
-);
-const IcoZap = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-  </svg>
-);
-
-// ─── Category data ────────────────────────────────────────────────────────────
-
-const CATEGORIES = [
-  {
-    slug: 'reading_comprehension',
-    name: 'Compréhension écrite',
-    color: '#4338CA', bg: '#EEF0FB',
-    icon: IcoFileText,
-    desc: 'Comprenez des textes variés et répondez à des questions ciblées.',
-    level: 'A1–C2',
-  },
-  {
-    slug: 'grammar',
-    name: 'Grammaire',
-    color: '#5B54C9', bg: '#F0EFFA',
-    icon: IcoBook,
-    desc: 'Maîtrisez les règles grammaticales essentielles du français.',
-    level: 'A1–C2',
-  },
-  {
-    slug: 'conjugation',
-    name: 'Conjugaison',
-    color: '#4F6BD6', bg: '#EEF2FC',
-    icon: IcoEdit,
-    desc: 'Pratiquez les temps verbaux et les modes de conjugaison.',
-    level: 'A1–C2',
-  },
-  {
-    slug: 'vocabulary',
-    name: 'Vocabulaire',
-    color: '#6366A8', bg: '#F0F1F7',
-    icon: IcoLibrary,
-    desc: 'Enrichissez votre vocabulaire avec des exercices thématiques.',
-    level: 'A1–C2',
-  },
+const features = [
+  { icon: IcoClock, title: 'Examens blancs chronométrés', text: 'Des sessions Express ou complètes avec compréhension orale, structures de la langue et compréhension écrite.' },
+  { icon: IcoMic, title: 'Expression écrite et orale', text: 'Des espaces dédiés pour vous entraîner à produire, pas seulement à reconnaître les bonnes réponses.' },
+  { icon: IcoRefresh, title: 'Révision ciblée des erreurs', text: 'Les exercices réussis, à revoir et à faire sont séparés pour guider vos prochaines sessions.' },
+  { icon: IcoFile, title: 'Supports authentiques', text: 'Affiches, SMS, courriels, articles, annonces et audio simulé pour se rapprocher du format TCF.' },
 ];
 
-const FEATURES = [
-  {
-    color: '#4338CA', bg: '#EEF0FB', icon: IcoLayers,
-    title: 'Exercices structurés',
-    desc: 'Contenus organisés par catégorie et niveau pour une progression optimale du A1 au C2.',
-  },
-  {
-    color: '#5B54C9', bg: '#F0EFFA', icon: IcoChart,
-    title: 'Suivi en temps réel',
-    desc: 'Statistiques détaillées et recommandations personnalisées basées sur vos résultats.',
-  },
-  {
-    color: '#4F6BD6', bg: '#EEF2FC', icon: IcoCheck,
-    title: 'Feedback instantané',
-    desc: 'Comprenez chaque erreur immédiatement avec une explication claire après chaque réponse.',
-  },
-  {
-    color: '#15966B', bg: '#EDFBF5', icon: IcoZap,
-    title: 'Contenu adaptatif',
-    desc: 'Des exercices qui vous accompagnent vers le niveau suivant selon vos performances.',
-  },
+const steps = [
+  ['Évaluez votre niveau', 'Commencez par un entraînement ou un examen blanc pour identifier vos priorités.'],
+  ['Entraînez-vous par compétence', 'Filtrez par catégorie, niveau et type de document pour travailler précisément.'],
+  ['Passez l’examen blanc', 'Mesurez votre progression dans un format chronométré et structuré.'],
 ];
-
-// ─── Home ─────────────────────────────────────────────────────────────────────
 
 const Home = () => {
-  const { isAuthenticated, user } = useAuth();
+  const [exerciseCount, setExerciseCount] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    axios.get('/api/exercises/count')
+      .then(res => { if (mounted) setExerciseCount(res.data.total); })
+      .catch(() => { if (mounted) setExerciseCount(null); });
+    return () => { mounted = false; };
+  }, []);
 
   return (
-    <>
-      {/* ══ HERO ════════════════════════════════════════════════════════════ */}
-      <section className="home-hero" aria-label="Présentation">
-        <div className="home-hero__inner">
-          {/* Text */}
+    <div className="landing">
+      <section className="landing-hero" style={{ '--hero-image': `url(${heroPreview})` }} aria-labelledby="landing-title">
+        <div className="landing-hero__overlay" />
+        <div className="landing-hero__inner">
+          <p className="landing-eyebrow">Préparation TCF · A1 à C2</p>
+          <h1 id="landing-title">Préparez le TCF sérieusement, à votre rythme</h1>
+          <p className="landing-hero__text">
+            Entraînez-vous avec des supports proches du TCF, des corrections détaillées et un suivi clair de vos progrès.
+          </p>
+          <div className="landing-hero__actions" aria-label="Actions principales">
+            <Link className="landing-btn landing-btn--primary" to="/auth?mode=register">Commencer gratuitement <IcoArrow /></Link>
+            <Link className="landing-btn landing-btn--secondary" to="/auth?mode=register&next=examen">Voir un exemple d’examen</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="landing-proof" aria-label="Chiffres clés">
+        <div className="landing-proof__inner">
+          <div><strong>{exerciseCount ?? '—'}</strong><span>exercices</span></div>
+          <div><strong>5</strong><span>catégories</span></div>
+          <div><strong>6</strong><span>niveaux A1-C2</span></div>
+          <div><strong>2</strong><span>formats d’examen blanc</span></div>
+        </div>
+      </section>
+
+      <section className="landing-section" aria-labelledby="features-title">
+        <div className="landing-section__head">
+          <p className="landing-kicker">Ce que vous travaillez</p>
+          <h2 id="features-title">Un entraînement construit autour des vraies compétences</h2>
+          <p>Pas de promesse magique : vous progressez parce que chaque réponse donne une information utile.</p>
+        </div>
+        <div className="landing-feature-grid">
+          {features.map(({ icon: Icon, title, text }) => (
+            <article className="landing-feature" key={title}>
+              <span className="landing-feature__icon"><Icon /></span>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-how" aria-labelledby="how-title">
+        <div className="landing-how__inner">
+          <div className="landing-section__head landing-section__head--left">
+            <p className="landing-kicker">Méthode</p>
+            <h2 id="how-title">Comment ça marche</h2>
+          </div>
+          <ol className="landing-steps">
+            {steps.map(([title, text], index) => (
+              <li key={title}>
+                <span>{index + 1}</span>
+                <div><h3>{title}</h3><p>{text}</p></div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className="landing-section landing-section--cred" aria-labelledby="cred-title">
+        <div className="landing-cred">
           <div>
-            <p className="home-hero__badge animate-fade-up">
-              <span className="home-hero__badge-dot" aria-hidden="true" />
-              Préparation officielle TCF · Niveaux A1 à C2
-            </p>
-
-            <h1 className="home-hero__h1 animate-fade-up-1">
-              {isAuthenticated ? (
-                <>Bon retour,<br /><em>{user?.firstname}</em></>
-              ) : (
-                <>Préparez votre<br /><em>TCF</em> avec méthode</>
-              )}
-            </h1>
-
-            <p className="home-hero__sub animate-fade-up-2">
-              {isAuthenticated
-                ? 'Continuez votre parcours. Chaque exercice vous rapproche de votre objectif de certification.'
-                : "Des exercices ciblés du niveau A1 au C2, un suivi précis de vos progrès et des recommandations personnalisées."}
-            </p>
-
-            <div className="home-hero__cta animate-fade-up-3">
-              {isAuthenticated ? (
-                <>
-                  <Link to="/exercices" className="btn-primary">
-                    Commencer un exercice <IcoArrow />
-                  </Link>
-                  <Link to="/dashboard" className="btn-secondary">
-                    Mon tableau de bord
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link to="/auth?mode=register" className="btn-primary">
-                    S'inscrire <IcoArrow />
-                  </Link>
-                  <Link to="/auth?mode=login" className="btn-secondary">
-                    Se connecter
-                  </Link>
-                </>
-              )}
-            </div>
-
-            <div className="home-hero__stats animate-fade-up-4">
-              <div className="home-stat">
-                <span className="home-stat__num">240</span>
-                <span className="home-stat__lbl">Questions</span>
-              </div>
-              <div className="home-stat">
-                <span className="home-stat__num">4</span>
-                <span className="home-stat__lbl">Catégories</span>
-              </div>
-              <div className="home-stat">
-                <span className="home-stat__num">A1–C2</span>
-                <span className="home-stat__lbl">Niveaux CECRL</span>
-              </div>
-              <div className="home-stat">
-                <span className="home-stat__num">100%</span>
-                <span className="home-stat__lbl">Gratuit</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Visual — mini category cards */}
-          <div className="home-hero__visual" aria-hidden="true">
-            {CATEGORIES.map(cat => {
-              const Icon = cat.icon;
-              return (
-                <div
-                  key={cat.slug}
-                  className="hv-card"
-                  style={{ '--cc': cat.color, '--cb': cat.bg }}
-                >
-                  <div className="hv-card__top">
-                    <div className="hv-card__ico" style={{ background: cat.bg, color: cat.color }}>
-                      <Icon />
-                    </div>
-                    <span className="hv-card__lvl">A1</span>
-                  </div>
-                  <span className="hv-card__name">{cat.name}</span>
-                  <div className="hv-card__bar">
-                    <div
-                      className="hv-card__bar-fill"
-                      style={{ width: `${40 + Math.random() * 40 | 0}%`, background: cat.color }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ CONTINUE STRIP (if logged in) ══════════════════════════════════ */}
-      {isAuthenticated && (
-        <div className="home-continue">
-          <div className="home-continue__inner">
-            <div className="home-continue__text">
-              <div className="home-continue__ico">
-                <IcoZap />
-              </div>
-              <div>
-                <p className="home-continue__title">Reprendre l'entraînement</p>
-                <p className="home-continue__sub">Continuez là où vous vous êtes arrêté</p>
-              </div>
-            </div>
-            <Link to="/exercices" className="btn-primary">
-              Voir les exercices <IcoArrow />
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* ══ CATEGORIES ══════════════════════════════════════════════════════ */}
-      <section className="home-cats">
-        <div className="home-cats__inner">
-          <div className="home-section-head">
-            <span className="home-section-kicker">Bibliothèque</span>
-            <h2>Toutes les catégories</h2>
-            <p>Choisissez votre domaine et progressez à votre rythme, niveau par niveau.</p>
-          </div>
-
-          <div className="home-cats__grid">
-            {CATEGORIES.map(cat => {
-              const Icon = cat.icon;
-              return (
-                <Link
-                  key={cat.slug}
-                  to="/exercices"
-                  className="home-cat-card"
-                  style={{ '--cc': cat.color, '--cb': cat.bg }}
-                  aria-label={`Exercices : ${cat.name}`}
-                >
-                  <div className="home-cat-card__ico">
-                    <Icon />
-                  </div>
-                  <span className="home-cat-card__name">{cat.name}</span>
-                  <h3 className="home-cat-card__title">{cat.name}</h3>
-                  <p className="home-cat-card__desc">{cat.desc}</p>
-                  <div className="home-cat-card__footer">
-                    <span>Niveaux {cat.level}</span>
-                    <span className="home-cat-card__arrow"><IcoArrow /></span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ WHY ════════════════════════════════════════════════════════════ */}
-      <section className="home-why">
-        <div className="home-why__inner">
-          <div className="home-section-head">
-            <span className="home-section-kicker">Nos points forts</span>
-            <h2>Pourquoi choisir TCF Prep ?</h2>
-            <p>Tout ce dont vous avez besoin pour réussir votre certification TCF. Rien de superflu.</p>
-          </div>
-
-          <div className="home-why__grid">
-            {FEATURES.map((f, i) => {
-              const Icon = f.icon;
-              return (
-                <div key={i} className="home-feat">
-                  <div className="home-feat__ico" style={{ background: f.bg, color: f.color }}>
-                    <Icon />
-                  </div>
-                  <h3 className="home-feat__title">{f.title}</h3>
-                  <p className="home-feat__desc">{f.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ CTA ════════════════════════════════════════════════════════════ */}
-      <section className="home-cta" aria-label="Appel à l'action">
-        <div className="home-cta__inner">
-          <div>
-            <h2>
-              {isAuthenticated
-                ? 'Continuez votre progression'
-                : 'Prêt à commencer ?'}
-            </h2>
+            <p className="landing-kicker">Pédagogie</p>
+            <h2 id="cred-title">Aligné CECRL, corrigé sans surpromettre</h2>
             <p>
-              {isAuthenticated
-                ? 'Accédez à vos statistiques, suivez vos progrès et obtenez des recommandations personnalisées.'
-                : "240 questions, 4 catégories, du A1 au C2. Inscription gratuite, accès complet, sans limite."}
+              Les exercices sont classés de A1 à C2 et les corrections expliquent la règle ou l’indice du support. Le but n’est pas de garantir un score, mais de rendre votre travail plus précis et plus régulier.
             </p>
           </div>
-          <div className="home-cta__actions">
-            {isAuthenticated ? (
-              <>
-                <Link to="/dashboard" className="btn-cta-white">Voir mes progrès <IcoArrow /></Link>
-                <Link to="/exercices" className="btn-secondary-dark">Exercices</Link>
-              </>
-            ) : (
-              <>
-                <Link to="/auth?mode=register" className="btn-cta-white">S'inscrire <IcoArrow /></Link>
-                <Link to="/auth?mode=login" className="btn-secondary-dark">Se connecter</Link>
-              </>
-            )}
-          </div>
+          <ul>
+            <li><IcoCheck /> Corrections avec règle et distracteurs expliqués</li>
+            <li><IcoCheck /> Supports écrits et audio variés</li>
+            <li><IcoCheck /> Progression par statut : réussi, à revoir, à faire</li>
+          </ul>
         </div>
       </section>
-    </>
+
+      <section className="landing-final" aria-labelledby="final-title">
+        <div>
+          <p className="landing-kicker">Prêt à travailler</p>
+          <h2 id="final-title">Commencez par une session courte</h2>
+          <p>Créez un compte, choisissez une compétence, puis revenez à vos erreurs quand vous voulez.</p>
+        </div>
+        <Link className="landing-btn landing-btn--primary" to="/auth?mode=register">Commencer gratuitement <IcoArrow /></Link>
+      </section>
+    </div>
   );
 };
 

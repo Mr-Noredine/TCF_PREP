@@ -5,11 +5,15 @@ import {
   getExercisesGrouped,
   getExerciseById,
   submitAttempt,
-  getCategories
+  getCategories,
+  getExerciseCount,
 } from '../controllers/exercisesController.js';
 import { protect, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// GET /api/exercises/count - Total exercise count (public)
+router.get('/count', getExerciseCount);
 
 // GET /api/exercises/list - Individual exercises with user status
 router.get('/list', optionalAuth, getExercisesWithStatus);

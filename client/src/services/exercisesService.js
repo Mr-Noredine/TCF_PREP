@@ -10,6 +10,7 @@ export const exercisesService = {
       if (filters.category) params.append('category', filters.category);
       if (filters.level) params.append('level', filters.level);
       if (filters.type) params.append('type', filters.type);
+      if (filters.docType) params.append('docType', filters.docType);
       if (filters.limit) params.append('limit', filters.limit);
       
       const response = await axios.get(`${API_URL}?${params}`);
@@ -26,6 +27,7 @@ export const exercisesService = {
       if (filters.category) params.append('category', filters.category);
       if (filters.level)    params.append('level', filters.level);
       if (filters.type)     params.append('type', filters.type);
+      if (filters.docType)  params.append('docType', filters.docType);
       const response = await axios.get(`${API_URL}/list?${params}`);
       return response.data;
     } catch (error) {

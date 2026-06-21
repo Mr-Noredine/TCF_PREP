@@ -231,7 +231,21 @@
 .input-wrapper select:focus {
     border-color: var(--black);
     background: var(--white);
-    box-shadow: none;
+    box-shadow: 0 0 0 3px rgba(67,56,202,.14);
+}
+
+.input-wrapper input:focus-visible,
+.input-wrapper select:focus-visible,
+.auth-tab:focus-visible,
+.toggle-password:focus-visible,
+.forgot-link:focus-visible {
+    outline: 3px solid rgba(67,56,202,.42);
+    outline-offset: 3px;
+}
+
+.checkbox-label input:focus-visible + .checkbox-custom {
+    outline: 3px solid rgba(67,56,202,.42);
+    outline-offset: 3px;
 }
 
 /* select : chevron personnalisé via l'icône SVG (déjà dans le HTML) */

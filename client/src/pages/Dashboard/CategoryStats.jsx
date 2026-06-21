@@ -62,23 +62,21 @@ const CategoryStats = ({ progress }) => {
   return (
     <div className="ds-cat-grid">
       {progress.map((cat, i) => {
-        const m = CAT_META[cat.category_slug] || { color: '#4F46E5', bg: '#EEF2FF', icon: IcoBook };
-        const Icon = m.icon;
+        const m         = CAT_META[cat.category_slug] || { color: '#4F46E5', bg: '#EEF2FF', icon: IcoBook };
+        const Icon      = m.icon;
         const completed = Math.min(Number(cat.completed_exercises || 0), Number(cat.total_exercises || 0));
-        const total = Number(cat.total_exercises || 0);
-        const pct = total > 0
-          ? Math.min(100, Math.round((completed / total) * 100))
-          : 0;
-        const score = Math.round(cat.average_score || 0);
+        const total     = Number(cat.total_exercises || 0);
+        const pct       = total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0;
+        const score     = Math.round(cat.average_score || 0);
 
         return (
           <div
-            key={i}
+            key={cat.category_slug || i}
             className="ds-cat-card"
-            onClick={() => navigate(`/exercice/${cat.category_slug}/${cat.level}`)}
+            onClick={() => navigate(`/exercices?category=${cat.category_slug}`)}
             tabIndex="0"
-            onKeyDown={e => e.key === 'Enter' && navigate(`/exercice/${cat.category_slug}/${cat.level}`)}
-            aria-label={`${cat.category_name} niveau ${cat.level} — score ${score}%`}
+            onKeyDown={e => e.key === 'Enter' && navigate(`/exercices?category=${cat.category_slug}`)}
+            aria-label={`${cat.category_name} — score moyen ${score}%`}
           >
             <div className="ds-cat-card__head">
               <div className="ds-cat-ico" style={{ background: m.bg, color: m.color }}>
@@ -86,7 +84,7 @@ const CategoryStats = ({ progress }) => {
               </div>
               <div>
                 <p className="ds-cat-name">{cat.category_name}</p>
-                <p className="ds-cat-lvl">Niveau {cat.level}</p>
+                <p className="ds-cat-lvl">{completed} exercices tentés</p>
               </div>
             </div>
 

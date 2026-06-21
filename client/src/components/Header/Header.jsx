@@ -43,6 +43,12 @@ const Header = () => {
               <li>
                 <Link to="/exercices" className={isActive('/exercices')}>Exercices</Link>
               </li>
+              <li>
+                <Link to="/expression" className={location.pathname.startsWith('/expression') ? 'nav-active' : ''}>Expression</Link>
+              </li>
+              <li>
+                <Link to="/examen" className={isActive('/examen')}>Examen blanc</Link>
+              </li>
               <li className="nav-dashboard-link">
                 <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
               </li>

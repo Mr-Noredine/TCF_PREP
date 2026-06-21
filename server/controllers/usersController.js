@@ -186,41 +186,58 @@ export const getRecommendations = async (req, res) => {
   try {
     const userId = req.user.id;
 
+    // Group by category only (no level) to avoid duplicate "Conjugaison B1 / Conjugaison A1" cards.
+    // weakest_level = the level with the lowest average score for that category.
     const progressCte = `
       WITH best_attempts AS (
         SELECT exercise_id, MAX(percentage)::NUMERIC AS best_percentage
         FROM exercise_attempts
         WHERE user_id = $1
         GROUP BY exercise_id
-      ), progress AS (
+      ), per_level AS (
         SELECT
           c.name,
           c.slug,
-          e.category_id,
+          c.id AS category_id,
           e.level,
-          COUNT(DISTINCT e.id)::int as total_exercises,
-          COUNT(DISTINCT e.id) FILTER (WHERE ba.best_percentage IS NOT NULL)::int as completed_exercises,
-          COALESCE(AVG(ba.best_percentage) FILTER (WHERE ba.best_percentage IS NOT NULL), 0) as average_score
+          COUNT(DISTINCT e.id)::int AS total_exercises,
+          COUNT(DISTINCT e.id) FILTER (WHERE ba.best_percentage IS NOT NULL)::int AS completed_exercises,
+          COALESCE(AVG(ba.best_percentage) FILTER (WHERE ba.best_percentage IS NOT NULL), 0) AS avg_score_level
         FROM exercises e
         JOIN categories c ON c.id = e.category_id
         LEFT JOIN best_attempts ba ON ba.exercise_id = e.id
-        GROUP BY c.name, c.slug, e.category_id, e.level
+        GROUP BY c.name, c.slug, c.id, e.level
+      ), progress AS (
+        SELECT
+          name,
+          slug,
+          SUM(total_exercises)::int AS total_exercises,
+          SUM(completed_exercises)::int AS completed_exercises,
+          CASE WHEN SUM(completed_exercises) > 0
+            THEN SUM(avg_score_level * completed_exercises) / SUM(completed_exercises)
+            ELSE 0
+          END AS average_score,
+          (SELECT level FROM per_level p2
+           WHERE p2.slug = pl.slug AND p2.completed_exercises > 0
+           ORDER BY p2.avg_score_level ASC LIMIT 1) AS weakest_level
+        FROM per_level pl
+        GROUP BY name, slug
       )
     `;
 
     const weakAreasQuery = `
       ${progressCte}
-      SELECT name, slug, level, average_score, completed_exercises, total_exercises
+      SELECT name, slug, weakest_level AS level, average_score, completed_exercises, total_exercises
       FROM progress
       WHERE average_score < 60
         AND completed_exercises > 0
       ORDER BY average_score ASC
-      LIMIT 3
+      LIMIT 4
     `;
 
     const strongAreasQuery = `
       ${progressCte}
-      SELECT name, slug, level, average_score, completed_exercises, total_exercises
+      SELECT name, slug, weakest_level AS level, average_score, completed_exercises, total_exercises
       FROM progress
       WHERE average_score >= 80
         AND completed_exercises > 0
@@ -230,19 +247,11 @@ export const getRecommendations = async (req, res) => {
 
     const nextLevelQuery = `
       ${progressCte}
-      SELECT name, slug, level, average_score, completed_exercises, total_exercises
+      SELECT name, slug, weakest_level AS level, average_score, completed_exercises, total_exercises
       FROM progress
       WHERE average_score >= 75
         AND completed_exercises >= 5
-      ORDER BY
-        CASE level
-          WHEN 'A1' THEN 1
-          WHEN 'A2' THEN 2
-          WHEN 'B1' THEN 3
-          WHEN 'B2' THEN 4
-          WHEN 'C1' THEN 5
-          WHEN 'C2' THEN 6
-        END ASC
+      ORDER BY average_score ASC
       LIMIT 3
     `;
 

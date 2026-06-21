@@ -6,6 +6,10 @@
   min-height: calc(100vh - 200px);
 }
 
+.exercise-view-main[inert] {
+  pointer-events: none;
+}
+
 /* ── Top navigation bar (ExerciceItem) ─────────────────── */
 .ev-topbar {
   display: flex;
@@ -33,6 +37,10 @@
   min-height: 44px;
 }
 .ev-back:hover { color: var(--black); }
+.ev-back:focus-visible {
+  outline: 3px solid rgba(67,56,202,.42);
+  outline-offset: 3px;
+}
 
 .ev-breadcrumb {
   display: flex;
@@ -201,6 +209,11 @@
 }
 
 .answer-option:hover:not(.disabled)::before { color: var(--gray-400); }
+.answer-option:focus-visible {
+  outline: 3px solid rgba(67,56,202,.42);
+  outline-offset: 3px;
+  z-index: 1;
+}
 
 .answer-option.selected {
   background: var(--black);
@@ -244,6 +257,10 @@
 .fill-blank-input::placeholder { color: var(--gray-400); }
 
 .fill-blank-input:focus { border-color: var(--black); }
+.fill-blank-input:focus-visible {
+  outline: 3px solid rgba(67,56,202,.42);
+  outline-offset: 3px;
+}
 
 .fill-blank-input.correct  { border-color: #16a34a; background: #f0fdf4; color: #15803d; }
 .fill-blank-input.incorrect { border-color: var(--accent); background: #fff1f2; color: #be123c; }
@@ -370,6 +387,16 @@
 .btn-quit-text:hover {
   color: var(--black);
   text-decoration-color: currentColor;
+}
+
+.btn-validate:focus-visible,
+.btn-next:focus-visible,
+.btn-quit:focus-visible,
+.btn-quit-text:focus-visible,
+.res-link-btn:focus-visible,
+.res-restart-link:focus-visible {
+  outline: 3px solid rgba(67,56,202,.42);
+  outline-offset: 3px;
 }
 
 /* ==================== RESULTS ==================== */
@@ -756,6 +783,12 @@
   background: var(--primary);
   color: #fff;
   border: 1px solid var(--primary);
+}
+
+.session-recap__primary:focus-visible,
+.session-recap__secondary:focus-visible {
+  outline: 3px solid rgba(67,56,202,.42);
+  outline-offset: 3px;
 }
 
 .session-recap__secondary {

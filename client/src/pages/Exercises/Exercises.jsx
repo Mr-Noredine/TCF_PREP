@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { exercisesService } from '../../services/exercisesService';
 import { getExerciseBestScore, getExerciseStatus, summarizeExercises } from '../../utils/exerciseStatus';
 import '../../styles/exercises.css';
@@ -21,10 +21,30 @@ const IcoEmpty    = () => <svg width="48" height="48" viewBox="0 0 24 24" fill="
 // ─── Metadata ─────────────────────────────────────────────────────────────────
 
 const CAT_META = {
-  reading_comprehension: { color: '#4338CA', bg: '#EEF0FB', Icon: IcoFileText },
-  grammar:               { color: '#5B54C9', bg: '#F0EFFA', Icon: IcoBook     },
-  conjugation:           { color: '#4F6BD6', bg: '#EEF2FC', Icon: IcoEdit     },
-  vocabulary:            { color: '#6366A8', bg: '#F0F1F7', Icon: IcoLibrary  },
+  reading_comprehension:   { color: '#4338CA', bg: '#EEF0FB', Icon: IcoFileText },
+  listening_comprehension: { color: '#0891B2', bg: '#ECFEFF', Icon: IcoLibrary  },
+  grammar:                 { color: '#5B54C9', bg: '#F0EFFA', Icon: IcoBook     },
+  conjugation:             { color: '#4F6BD6', bg: '#EEF2FC', Icon: IcoEdit     },
+  vocabulary:              { color: '#6366A8', bg: '#F0F1F7', Icon: IcoLibrary  },
+};
+
+const DOC_TYPE_LABELS = {
+  sms: 'SMS',
+  courriel: 'Courriel',
+  lettre: 'Lettre',
+  affiche: 'Affiche',
+  annonce: 'Annonce',
+  panneau: 'Panneau',
+  menu: 'Menu',
+  article: 'Article',
+  horaire: 'Horaire',
+  document_administratif: 'Document administratif',
+  publicite: 'Publicité',
+  dialogue: 'Dialogue',
+  annonce_audio: 'Annonce audio',
+  message_vocal: 'Message vocal',
+  interview: 'Interview',
+  bulletin: 'Bulletin',
 };
 
 const LVL_META = {
@@ -93,6 +113,7 @@ const ExerciceCard = ({ ex, index, onStart }) => {
   const sc       = hasScore ? getScoreTheme(bestScore) : null;
   const btnLbl   = getBtnLabel(st);
   const typeLabel = ex.type === 'mcq' ? 'QCM' : ex.type === 'fill_blank' ? 'Texte à trous' : (ex.type || '');
+  const docLabel = ex.docType ? DOC_TYPE_LABELS[ex.docType] || ex.docType : null;
   const exNum    = ex.id ? parseInt(ex.id.split('_').pop(), 10) || null : null;
 
   return (
@@ -117,6 +138,7 @@ const ExerciceCard = ({ ex, index, onStart }) => {
         <div className="ec-meta">
           <span className={`ec-badge ec-badge--level ${lv.cls}`}>{ex.level} — {lv.label}</span>
           {typeLabel && <span className="ec-badge ec-badge--type">{typeLabel}</span>}
+          {docLabel && <span className="ec-badge ec-badge--doctype">{docLabel}</span>}
           {exNum && <span className="ec-badge ec-badge--num">Exercice {exNum}</span>}
         </div>
       </div>
@@ -203,6 +225,36 @@ const CategoryCard = ({ cat, index, summary, onSelect }) => {
   );
 };
 
+// ─── DocTypeFilters — document type chips ───────────────────────────────────
+
+const DocTypeFilters = ({ stats, totalCount, activeDocType, onSelect }) => {
+  if (!stats.length) return null;
+
+  return (
+    <div className="ex-doc-filter" role="group" aria-label="Filtrer par type de document">
+      <button
+        type="button"
+        className={`ex-doc-chip${activeDocType === 'tous' ? ' ex-doc-chip--on' : ''}`}
+        aria-pressed={activeDocType === 'tous'}
+        onClick={() => onSelect('tous')}
+      >
+        Tous <span>{totalCount}</span>
+      </button>
+      {stats.map(({ type, label, count }) => (
+        <button
+          key={type}
+          type="button"
+          className={`ex-doc-chip${activeDocType === type ? ' ex-doc-chip--on' : ''}`}
+          aria-pressed={activeDocType === type}
+          onClick={() => onSelect(type)}
+        >
+          {label} <span>{count}</span>
+        </button>
+      ))}
+    </div>
+  );
+};
+
 // ─── CategoryOverview — selected category context ────────────────────────────
 
 const CategoryOverview = ({ cat, summary, levels, activeLevel, onLevelSelect, onBack, onStartFirst, canStart }) => {
@@ -278,15 +330,41 @@ const CategoryOverview = ({ cat, summary, levels, activeLevel, onLevelSelect, on
 
 const Exercises = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [exercises,    setExercises]  = useState([]);
   const [categories,   setCategories] = useState([]);
   const [loading,      setLoading]    = useState(true);
 
-  const [activeFilter, setFilter]     = useState('tous');
-  const [activeLevel,  setLevel]      = useState('tous');
+  const [activeFilter, setFilter]     = useState(() => searchParams.get('category') || 'tous');
+  const [activeLevel,  setLevel]      = useState(() => searchParams.get('level') || 'tous');
+  const [activeDocType, setDocType]   = useState(() => searchParams.get('docType') || 'tous');
+  const [activeStatus, setStatus]     = useState(() => searchParams.get('status') || 'tous');
 
   useEffect(() => { loadData(); }, []);
+
+  useEffect(() => {
+    setFilter(searchParams.get('category') || 'tous');
+    setLevel(searchParams.get('level') || 'tous');
+    setDocType(searchParams.get('docType') || 'tous');
+    setStatus(searchParams.get('status') || 'tous');
+  }, [searchParams]);
+
+  const updateFilters = next => {
+    const params = new URLSearchParams(searchParams);
+    const nextCategory = next.category ?? activeFilter;
+    const nextLevel = next.level ?? activeLevel;
+    const nextDocType = next.docType ?? activeDocType;
+
+    if (nextCategory && nextCategory !== 'tous') params.set('category', nextCategory);
+    else params.delete('category');
+    if (nextLevel && nextLevel !== 'tous') params.set('level', nextLevel);
+    else params.delete('level');
+    if (nextDocType && nextDocType !== 'tous') params.set('docType', nextDocType);
+    else params.delete('docType');
+
+    setSearchParams(params, { replace: false });
+  };
 
   const loadData = async () => {
     try {
@@ -303,10 +381,13 @@ const Exercises = () => {
     }
   };
 
-  const isCategorySelection = activeFilter === 'tous';
+  const isReviewMode = activeStatus === 'a-revoir' && activeFilter === 'tous';
+  const isCategorySelection = activeFilter === 'tous' && !isReviewMode;
   const activeCategoryExercises = isCategorySelection
     ? []
-    : exercises.filter(e => e.category_slug === activeFilter);
+    : isReviewMode
+      ? exercises
+      : exercises.filter(e => e.category_slug === activeFilter);
   const levels = [...new Set(activeCategoryExercises.map(e => e.level))].sort();
 
   const getCategorySummary = slug => {
@@ -318,20 +399,39 @@ const Exercises = () => {
   };
 
   const selectCategory = slug => {
-    setFilter(slug);
-    setLevel('tous');
+    updateFilters({ category: slug, level: 'tous', docType: 'tous' });
   };
 
   const backToCategories = () => {
-    setFilter('tous');
-    setLevel('tous');
+    updateFilters({ category: 'tous', level: 'tous', docType: 'tous' });
   };
 
+  const selectLevel = level => {
+    updateFilters({ level });
+  };
+
+  const selectDocType = docType => {
+    updateFilters({ docType });
+  };
+
+  const filteredForDocStats = activeCategoryExercises.filter(ex => (
+    (activeLevel === 'tous' || ex.level === activeLevel) &&
+    (activeStatus === 'tous' || getExerciseStatus(ex) === activeStatus)
+  ));
+  const docTypeStats = Object.entries(filteredForDocStats.reduce((acc, ex) => {
+    if (!ex.docType) return acc;
+    acc[ex.docType] = (acc[ex.docType] || 0) + 1;
+    return acc;
+  }, {})).map(([type, count]) => ({ type, count, label: DOC_TYPE_LABELS[type] || type }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'fr'));
+
   const filtered = activeCategoryExercises.filter(ex => (
-    activeLevel === 'tous' || ex.level === activeLevel
+    (activeLevel === 'tous' || ex.level === activeLevel) &&
+    (activeDocType === 'tous' || ex.docType === activeDocType) &&
+    (activeStatus === 'tous' || getExerciseStatus(ex) === activeStatus)
   ));
 
-  const hasExerciseFilter = activeLevel !== 'tous';
+  const hasExerciseFilter = activeLevel !== 'tous' || activeDocType !== 'tous';
 
   const globalSummary = summarizeExercises(exercises);
   const totalDone   = globalSummary.done;
@@ -414,18 +514,36 @@ const Exercises = () => {
               summary={activeCategorySummary}
               levels={levels}
               activeLevel={activeLevel}
-              onLevelSelect={setLevel}
+              onLevelSelect={selectLevel}
               onBack={backToCategories}
               onStartFirst={startFirstVisibleExercise}
               canStart={filtered.length > 0}
             />
           )}
 
+          {/* Review mode banner */}
+          {isReviewMode && (
+            <div style={{
+              padding: '10px 16px', background: '#FEF8EC', border: '1px solid #FDE68A',
+              borderRadius: '10px', fontSize: '.875rem', color: '#92400E',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+            }}>
+              <span>Mode révision — exercices avec score {'<'} 70 %</span>
+              <button
+                type="button"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D97706', fontWeight: 700, fontSize: '.8rem' }}
+                onClick={() => setSearchParams({}, { replace: false })}
+              >
+                Quitter
+              </button>
+            </div>
+          )}
+
           {/* Section header */}
           <div className="ex-section-header">
             <div className="ex-section-header__left">
               <h2 className="ex-section-header__title">
-                {isCategorySelection ? 'Choisissez une catégorie' : activeCatName}
+                {isCategorySelection ? 'Choisissez une catégorie' : isReviewMode ? 'Réviser mes erreurs' : activeCatName}
               </h2>
               {!loading && (
                 <p className="ex-section-header__count">
@@ -449,6 +567,15 @@ const Exercises = () => {
               )}
             </div>
           </div>
+
+          {!isCategorySelection && (
+            <DocTypeFilters
+              stats={docTypeStats}
+              totalCount={filteredForDocStats.length}
+              activeDocType={activeDocType}
+              onSelect={selectDocType}
+            />
+          )}
 
           {/* Cards */}
           {loading ? (

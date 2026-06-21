@@ -58,6 +58,45 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 1000;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  left: 8px;
+  top: 8px;
+  outline: 3px solid rgba(255,255,255,.8);
+  outline-offset: 2px;
+}
+
+.app-main:focus { outline: none; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid rgba(67,56,202,.42);
+  outline-offset: 3px;
+}
+
 body {
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   background: var(--app-bg);

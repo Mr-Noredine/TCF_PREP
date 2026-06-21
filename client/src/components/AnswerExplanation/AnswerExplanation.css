@@ -1,0 +1,49 @@
+.answer-explanation {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: inherit;
+}
+
+.answer-explanation__rule {
+  margin: 0;
+}
+
+.answer-explanation__rule + .answer-explanation__distractors {
+  margin-top: 0.75rem;
+}
+
+.answer-explanation__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.answer-explanation ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.answer-explanation li + li {
+  margin-top: 0.35rem;
+}
+
+.answer-explanation--compact {
+  font-size: 0.8125rem;
+  color: var(--tx-2);
+  border-top: 1px solid var(--border-light);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.feedback-zone .answer-explanation {
+  color: rgba(255,255,255,0.88);
+}
+
+.feedback-zone .answer-explanation__rule strong,
+.feedback-zone .answer-explanation li strong {
+  color: #fff;
+}

@@ -9,7 +9,8 @@
     "dev": "nodemon server.js",
     "db:setup": "node config/setupDatabase.js",
     "db:seed": "node config/seedDatabase.js",
-    "db:migrate-google": "node config/migrateGoogleAuth.js"
+    "db:migrate-google": "node config/migrateGoogleAuth.js",
+    "db:migrate-examens": "node config/migrateExamens.js"
   },
   "keywords": [
     "tcf",

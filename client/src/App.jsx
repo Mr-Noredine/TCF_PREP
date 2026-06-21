@@ -10,6 +10,12 @@ import ExerciceItem from './pages/ExerciceView/ExerciceItem';
 import QuizActive from './pages/QuizActive/QuizActive';
 import QuizResults from './pages/QuizResults/QuizResults';
 import Dashboard from './pages/Dashboard/Dashboard';
+import Examen from './pages/Examen/Examen';
+import ExamenSession from './pages/Examen/ExamenSession';
+import ExamenResultats from './pages/Examen/ExamenResultats';
+import Expression from './pages/Expression/Expression';
+import ExpressionEcrite from './pages/Expression/ExpressionEcrite';
+import ExpressionOrale from './pages/Expression/ExpressionOrale';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -30,16 +36,20 @@ function App() {
   const location = useLocation();
   const { user, loading } = useAuth();
   const isExercisePage = /^\/exercice\//.test(location.pathname);
+  const isExamSession  = /^\/examen\/session\//.test(location.pathname);
+  const hideChrome     = isExercisePage || isExamSession;
 
   return (
     <div className="App">
-      {!isExercisePage && <Header />}
+      <a className="skip-link" href="#contenu">Aller au contenu</a>
+      {!hideChrome && <Header />}
 
+      <main id="contenu" className="app-main" tabIndex="-1">
       <Routes>
         <Route
           path="/"
           element={
-            loading ? null : user ? <Navigate to="/exercices" replace /> : <Home />
+            loading ? null : user ? <Navigate to="/dashboard" replace /> : <Home />
           }
         />
         <Route path="/auth" element={<Auth />} />
@@ -48,22 +58,20 @@ function App() {
         <Route path="/exercice/:category/:level" element={<ProtectedRoute><ExerciceView /></ProtectedRoute>} />
         <Route path="/quiz/active" element={<ProtectedRoute><QuizActive /></ProtectedRoute>} />
         <Route path="/quiz/results" element={<ProtectedRoute><QuizResults /></ProtectedRoute>} />
-        
-        {/* Protected routes (require login) */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } 
-        />
-        
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/examen" element={<ProtectedRoute><Examen /></ProtectedRoute>} />
+        <Route path="/examen/session/:sessionId" element={<ProtectedRoute><ExamenSession /></ProtectedRoute>} />
+        <Route path="/examen/resultats/:sessionId" element={<ProtectedRoute><ExamenResultats /></ProtectedRoute>} />
+        <Route path="/expression" element={<ProtectedRoute><Expression /></ProtectedRoute>} />
+        <Route path="/expression-ecrite" element={<ProtectedRoute><ExpressionEcrite /></ProtectedRoute>} />
+        <Route path="/expression-orale" element={<ProtectedRoute><ExpressionOrale /></ProtectedRoute>} />
+
         {/* 404 */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      
-      {!isExercisePage && <Footer />}
+      </main>
+
+      {!hideChrome && <Footer />}
     </div>
   );
 }

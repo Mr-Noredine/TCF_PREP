@@ -24,16 +24,16 @@ const Recommendations = ({ recommendations }) => {
     type: 'improve',
     label: 'À améliorer',
     title: `Améliorez ${a.name}`,
-    text: `Score actuel : ${Math.round(a.average_score)}% au niveau ${a.level}. Continuez à pratiquer !`,
-    action: 'Pratiquer', link: `/exercice/${a.slug}/${a.level}`,
+    text: `Score moyen : ${Math.round(a.average_score)}%${a.level ? ` — point faible au niveau ${a.level}` : ''}. Continuez à pratiquer !`,
+    action: 'Pratiquer', link: `/exercices?category=${a.slug}`,
   }));
 
   strongAreas?.forEach(a => recs.push({
     type: 'continue',
     label: 'Point fort',
     title: `Excellent en ${a.name} !`,
-    text: `Vous maîtrisez cette catégorie avec ${Math.round(a.average_score)}% au niveau ${a.level}.`,
-    action: 'Continuer', link: `/exercice/${a.slug}/${a.level}`,
+    text: `Vous maîtrisez cette catégorie avec ${Math.round(a.average_score)}% de score moyen.`,
+    action: 'Continuer', link: `/exercices?category=${a.slug}`,
   }));
 
   nextLevel?.forEach(a => {
@@ -43,8 +43,8 @@ const Recommendations = ({ recommendations }) => {
       type: 'level-up',
       label: 'Niveau suivant',
       title: `Passez au ${next} en ${a.name}`,
-      text: `${Math.round((a.completed_exercises / a.total_exercises) * 100)}% du niveau ${a.level} complété avec ${Math.round(a.average_score)}%. Prêt pour la suite ?`,
-      action: 'Commencer', link: `/exercice/${a.slug}/${next}`,
+      text: `${Math.round(a.average_score)}% de score moyen — prêt pour le niveau supérieur ?`,
+      action: 'Commencer', link: `/exercices?category=${a.slug}`,
     });
   });
 

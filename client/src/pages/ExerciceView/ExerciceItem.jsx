@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { exercisesService } from '../../services/exercisesService';
+import ExamSupport from '../../components/ExamSupport/ExamSupport';
+import AnswerExplanation from '../../components/AnswerExplanation/AnswerExplanation';
 import '../../styles/exerciceView.css';
 
 const IcoArrow = () => (
@@ -23,7 +25,69 @@ function formatSessionDuration(startedAt) {
   return `${minutes}min ${String(seconds).padStart(2, '0')}s`;
 }
 
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+function useFocusTrap(onClose) {
+  const trapRef = useRef(null);
+
+  useEffect(() => {
+    const node = trapRef.current;
+    if (!node) return undefined;
+
+    const getFocusable = () => Array.from(node.querySelectorAll(FOCUSABLE_SELECTOR))
+      .filter(el => !el.hasAttribute('aria-hidden'));
+
+    const focusTimer = window.setTimeout(() => {
+      getFocusable()[0]?.focus();
+    }, 0);
+
+    const handleKeyDown = event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusable = getFocusable();
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && (active === first || !node.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
+  return trapRef;
+}
+
 const SessionRecap = ({ stats, startedAt, onContinue, onExit }) => {
+  const dialogRef = useFocusTrap(onContinue);
   const pct = stats.answered > 0 ? Math.round((stats.correct / stats.answered) * 100) : 0;
   const answerLabel = stats.correct === 1 ? 'bonne réponse' : 'bonnes réponses';
   const message = pct === 100
@@ -35,13 +99,20 @@ const SessionRecap = ({ stats, startedAt, onContinue, onExit }) => {
         : 'Ce point mérite une révision. Reprends-le à tête reposée.';
 
   return (
-    <div className="session-recap" role="dialog" aria-modal="true" aria-labelledby="session-recap-title">
+    <div
+      ref={dialogRef}
+      className="session-recap"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="session-recap-title"
+      aria-describedby="session-recap-message"
+    >
       <div className="session-recap__panel">
         <p className="session-recap__kicker">Récap de session</p>
         <h2 id="session-recap-title" className="session-recap__title">
           {stats.correct} {answerLabel} sur {stats.answered}
         </h2>
-        <p className="session-recap__message">{message}</p>
+        <p id="session-recap-message" className="session-recap__message">{message}</p>
 
         <div className="session-recap__score">
           <span>{pct}%</span>
@@ -58,7 +129,8 @@ const SessionRecap = ({ stats, startedAt, onContinue, onExit }) => {
           <button className="session-recap__secondary" onClick={onContinue}>Continuer</button>
           <button className="session-recap__primary" onClick={onExit}>Retour à la bibliothèque</button>
         </div>
-      </div>    </div>
+      </div>
+    </div>
   );
 };
 
@@ -79,6 +151,7 @@ const ExerciceItem = () => {
   const sessionStartedAt                   = useRef(Date.now());
   const [sessionStats, setSessionStats]    = useState({ answered: 0, correct: 0 });
   const [showSessionRecap, setShowSessionRecap] = useState(false);
+  const recapTriggerRef                         = useRef(null);
 
   useEffect(() => {
     setLoading(true);
@@ -168,16 +241,33 @@ const ExerciceItem = () => {
     });
   };
 
-  const requestExit = () => {
+  const closeSessionRecap = () => {
+    setShowSessionRecap(false);
+    window.requestAnimationFrame(() => {
+      recapTriggerRef.current?.focus?.();
+    });
+  };
+
+  const requestExit = event => {
     if (sessionStats.answered === 0) {
       navigate('/exercices');
       return;
     }
+
+    if (event?.currentTarget) {
+      recapTriggerRef.current = event.currentTarget;
+    } else if (document.activeElement instanceof HTMLElement) {
+      recapTriggerRef.current = document.activeElement;
+    }
+
     setShowSessionRecap(true);
   };
 
   // ── Progress ───────────────────────────────────────────────────────────────
   const progress = hasNav ? ((currentIndex + 1) / exerciseList.length) * 100 : 0;
+  const questionAnnouncement = hasNav
+    ? `Question ${currentIndex + 1} sur ${exerciseList.length}, ${exercise.category_name}, niveau ${exercise.level}.`
+    : `Question ${exercise.category_name}, niveau ${exercise.level}.`;
 
   // ── Theme by category ──────────────────────────────────────────────────────
   const COLORS = {
@@ -190,6 +280,7 @@ const ExerciceItem = () => {
 
   return (
     <div className="exercise-view-container">
+      <div className="exercise-view-main" inert={showSessionRecap ? '' : undefined}>
 
       {/* ── Top bar ─────────────────────────────────────────────────────── */}
       <div className="ev-topbar">
@@ -217,13 +308,19 @@ const ExerciceItem = () => {
         </div>
       )}
 
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {questionAnnouncement}
+      </p>
+
       {/* ── Question card ───────────────────────────────────────────────── */}
       <div className="question-card" style={{ borderTop: `3px solid ${accentColor}` }}>
         <div className="question-number" style={{ color: accentColor }}>
           {exercise.category_name} · {exercise.level}
         </div>
 
-        {exercise.context && (
+        <ExamSupport support={exercise.support} questionKey={exercise.id} />
+
+        {exercise.context && !exercise.support && (
           <div className="question-context">{exercise.context}</div>
         )}
 
@@ -274,15 +371,23 @@ const ExerciceItem = () => {
 
         {/* Feedback */}
         {showFeedback && (
-          <div className={`feedback-zone ${isCorrect ? 'correct' : 'incorrect'}`}>
+          <div
+            className={`feedback-zone ${isCorrect ? 'correct' : 'incorrect'}`}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             <div className="feedback-icon">{isCorrect ? '✓' : '✗'}</div>
             <div className="feedback-content">
               <div className="feedback-title">
                 {isCorrect ? 'Correct !' : `Incorrect — La bonne réponse : ${exercise.type === 'mcq' ? choices[correctIndex] : exercise.answer}`}
               </div>
-              {exercise.explanation && (
-                <div className="feedback-explanation">{exercise.explanation}</div>
-              )}
+              <div className="feedback-explanation">
+                <AnswerExplanation
+                  explanation={exercise.explanation}
+                  distractors={exercise.distractors}
+                />
+              </div>
             </div>
           </div>
         )}
@@ -331,11 +436,13 @@ const ExerciceItem = () => {
         )}
       </div>
 
+      </div>
+
       {showSessionRecap && (
         <SessionRecap
           stats={sessionStats}
           startedAt={sessionStartedAt.current}
-          onContinue={() => setShowSessionRecap(false)}
+          onContinue={closeSessionRecap}
           onExit={() => navigate('/exercices')}
         />
       )}

@@ -2,6 +2,70 @@
    DASHBOARD  —  TCF Prep
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ── Quick actions ──────────────────────────────────────────────────────────── */
+.ds-quick-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ds-quick-card {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 16px 20px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  box-shadow: var(--sh-sm);
+  cursor: pointer;
+  transition: box-shadow 160ms, transform 160ms;
+}
+.ds-quick-card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+
+.ds-quick-card--session { border-left: 3px solid var(--primary); }
+.ds-quick-card--review  { border-left: 3px solid #D97706; }
+
+.ds-quick-card__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ds-quick-card__ico {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ds-quick-card__ico--warn { background: #FEF8EC; color: #D97706; }
+
+.ds-quick-card__title {
+  font-size: .875rem;
+  font-weight: 700;
+  color: var(--tx-1);
+  margin-bottom: 2px;
+}
+.ds-quick-card__sub {
+  font-size: .75rem;
+  color: var(--tx-3);
+}
+
+.ds-quick-badge {
+  min-width: 28px; height: 28px;
+  border-radius: 14px;
+  background: #FEF8EC;
+  color: #D97706;
+  font-size: .8rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 8px;
+}
+
 /* ── Layout ─────────────────────────────────────────────────────────────────── */
 .ds-page {
   max-width: 1280px;
