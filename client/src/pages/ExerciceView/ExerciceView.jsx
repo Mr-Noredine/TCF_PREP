@@ -130,22 +130,18 @@ const ExerciceView = () => {
         ? JSON.parse(currentExercise.choices)
         : currentExercise.choices;
 
-      // Get correct answer
       const correctAnswer = currentExercise.answer;
-      
-      // Check if answer is a number (index) or a string (value)
+      const normA = s => s.trim().replace(/[   ⁠]/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+
       let correctIndex;
       if (typeof correctAnswer === 'number') {
         correctIndex = correctAnswer;
-      } else if (!isNaN(parseInt(correctAnswer))) {
-        correctIndex = parseInt(correctAnswer);
+      } else if (/^\d+$/.test(String(correctAnswer).trim())) {
+        correctIndex = parseInt(correctAnswer, 10);
       } else {
-        // Answer is the text value, find its index
-        correctIndex = choices.findIndex(choice => 
-          choice.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
-        );
+        correctIndex = choices.findIndex(c => normA(c) === normA(String(correctAnswer)));
       }
-      
+
       correct = selectedOption === correctIndex;
       
     } else if (currentExercise.type === 'fill_blank') {
@@ -268,25 +264,17 @@ const ExerciceView = () => {
     );
   }
 
-  // Exercise View
+  const normAnswer = s => s.trim().replace(/[   ⁠]/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+
   const getCorrectIndex = () => {
     if (!currentExercise || currentExercise.type !== 'mcq') return -1;
-    
     const choices = typeof currentExercise.choices === 'string'
       ? JSON.parse(currentExercise.choices)
       : currentExercise.choices;
-    
-    const correctAnswer = currentExercise.answer;
-    
-    if (typeof correctAnswer === 'number') {
-      return correctAnswer;
-    } else if (!isNaN(parseInt(correctAnswer))) {
-      return parseInt(correctAnswer);
-    } else {
-      return choices.findIndex(choice => 
-        choice.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
-      );
-    }
+    const a = currentExercise.answer;
+    if (typeof a === 'number') return a;
+    if (/^\d+$/.test(String(a).trim())) return parseInt(a, 10);
+    return choices.findIndex(c => normAnswer(c) === normAnswer(String(a)));
   };
 
   const correctIndex = getCorrectIndex();

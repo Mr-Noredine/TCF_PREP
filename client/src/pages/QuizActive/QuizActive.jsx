@@ -63,21 +63,11 @@ const QuizActive = () => {
       : [];
     
     const correctAnswer = question.answer;
-    
-    // If answer is a number
-    if (typeof correctAnswer === 'number') {
-      return correctAnswer;
-    }
-    
-    // If answer is a numeric string
-    if (!isNaN(parseInt(correctAnswer))) {
-      return parseInt(correctAnswer);
-    }
-    
-    // If answer is the text value, find its index
-    return choices.findIndex(choice => 
-      choice.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
-    );
+    const norm = s => s.trim().replace(/[   ⁠]/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+
+    if (typeof correctAnswer === 'number') return correctAnswer;
+    if (/^\d+$/.test(String(correctAnswer).trim())) return parseInt(correctAnswer, 10);
+    return choices.findIndex(c => norm(c) === norm(String(correctAnswer)));
   };
 
   const handleAnswerSelect = (index) => {

@@ -189,12 +189,14 @@ const ExerciceItem = () => {
     ? (typeof exercise.choices === 'string' ? JSON.parse(exercise.choices) : exercise.choices)
     : [];
 
+  const normAnswer = s => s.trim().replace(/[   ⁠]/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+
   const correctIndex = (() => {
     if (exercise.type !== 'mcq') return -1;
-    const a = exercise.answer;
-    if (typeof a === 'number') return a;
-    if (!isNaN(parseInt(a)))   return parseInt(a);
-    return choices.findIndex(c => c.trim().toLowerCase() === String(a).trim().toLowerCase());
+    const a = String(exercise.answer);
+    if (typeof exercise.answer === 'number') return exercise.answer;
+    if (/^\d+$/.test(a.trim())) return parseInt(a, 10);
+    return choices.findIndex(c => normAnswer(c) === normAnswer(a));
   })();
 
   // ── Validate ───────────────────────────────────────────────────────────────
@@ -381,7 +383,7 @@ const ExerciceItem = () => {
             <div className="feedback-icon">{isCorrect ? '✓' : '✗'}</div>
             <div className="feedback-content">
               <div className="feedback-title">
-                {isCorrect ? 'Correct !' : `Incorrect — La bonne réponse : ${exercise.type === 'mcq' ? choices[correctIndex] : exercise.answer}`}
+                {isCorrect ? 'Correct !' : `Incorrect — La bonne réponse : ${exercise.type === 'mcq' ? (correctIndex >= 0 ? choices[correctIndex] : exercise.answer) : exercise.answer}`}
               </div>
               <div className="feedback-explanation">
                 <AnswerExplanation

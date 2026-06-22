@@ -45,36 +45,35 @@ function fmtDuration(s) {
   return m > 0 ? `${m} min ${sec} s` : `${sec} s`;
 }
 
-// Derive correct answer text from choices + answer field
+const normStr = s => s.trim().replace(/[   ⁠]/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+const isPureInt = s => /^\d+$/.test(String(s).trim());
+
+function resolveCorrectIndex(choices, answer) {
+  if (typeof answer === 'number') return answer;
+  if (isPureInt(answer)) return parseInt(answer, 10);
+  return choices.findIndex(c => normStr(c) === normStr(String(answer)));
+}
+
 function getCorrectText(choices, answer) {
   if (!choices) return answer;
   const parsed = typeof choices === 'string' ? JSON.parse(choices) : choices;
-  if (!isNaN(parseInt(answer))) {
-    return parsed[parseInt(answer)] ?? answer;
-  }
-  return answer;
+  const idx = resolveCorrectIndex(parsed, answer);
+  return idx >= 0 ? (parsed[idx] ?? answer) : answer;
 }
 
 function getGivenText(choices, given) {
   if (given === null || given === undefined) return null;
   if (!choices) return given;
   const parsed = typeof choices === 'string' ? JSON.parse(choices) : choices;
-  if (!isNaN(parseInt(given))) {
-    return parsed[parseInt(given)] ?? given;
-  }
+  if (isPureInt(given)) return parsed[parseInt(given, 10)] ?? given;
   return given;
 }
 
 function isCorrect(answer, choices, given) {
   if (given === null || given === undefined) return false;
   const parsed = typeof choices === 'string' ? JSON.parse(choices ?? '[]') : (choices || []);
-  let correctIdx;
-  if (!isNaN(parseInt(answer))) {
-    correctIdx = parseInt(answer);
-  } else {
-    correctIdx = parsed.findIndex(c => c.trim().toLowerCase() === answer.trim().toLowerCase());
-  }
-  return parseInt(given) === correctIdx;
+  const correctIdx = resolveCorrectIndex(parsed, answer);
+  return parseInt(given, 10) === correctIdx;
 }
 
 const ExamenResultats = () => {
