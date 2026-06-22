@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { examenService } from '../../services/examenService';
 import AnswerExplanation from '../../components/AnswerExplanation/AnswerExplanation';
+import { cleanExercisePrompt } from '../../utils/exerciseDisplay';
 import '../../styles/examen.css';
 
 const IcoArrow = () => (
@@ -230,7 +231,7 @@ const ExamenResultats = () => {
                   </span>
                 </div>
 
-                <div className="exb-qitem__prompt">{q.prompt}</div>
+                <div className="exb-qitem__prompt">{cleanExercisePrompt(q.prompt)}</div>
 
                 <div className="exb-qitem__answers">
                   {given !== null && given !== undefined ? (

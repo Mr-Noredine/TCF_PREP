@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { exercisesService } from '../../services/exercisesService';
 import { getExerciseBestScore, getExerciseStatus, summarizeExercises } from '../../utils/exerciseStatus';
+import { cleanExercisePrompt } from '../../utils/exerciseDisplay';
 import '../../styles/exercises.css';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -114,7 +115,7 @@ const ExerciceCard = ({ ex, index, onStart }) => {
   const btnLbl   = getBtnLabel(st);
   const typeLabel = ex.type === 'mcq' ? 'QCM' : ex.type === 'fill_blank' ? 'Texte à trous' : (ex.type || '');
   const docLabel = ex.docType ? DOC_TYPE_LABELS[ex.docType] || ex.docType : null;
-  const exNum    = ex.id ? parseInt(ex.id.split('_').pop(), 10) || null : null;
+  const displayNumber = index + 1;
 
   return (
     <article
@@ -124,7 +125,7 @@ const ExerciceCard = ({ ex, index, onStart }) => {
       tabIndex="0"
       onKeyDown={e => e.key === 'Enter' && onStart(ex)}
       role="button"
-      aria-label={`Exercice ${ex.category_name} niveau ${ex.level}`}
+      aria-label={`${ex.category_name} · n°${displayNumber} · niveau ${ex.level}`}
     >
       {/* Category icon */}
       <div className="ec-ico" aria-hidden="true">
@@ -134,12 +135,12 @@ const ExerciceCard = ({ ex, index, onStart }) => {
       {/* Main content */}
       <div className="ec-main">
         <span className="ec-cat">{ex.category_name}</span>
-        <p className="ec-title">{ex.prompt}</p>
+        <p className="ec-title">{cleanExercisePrompt(ex.prompt)}</p>
         <div className="ec-meta">
           <span className={`ec-badge ec-badge--level ${lv.cls}`}>{ex.level} — {lv.label}</span>
           {typeLabel && <span className="ec-badge ec-badge--type">{typeLabel}</span>}
           {docLabel && <span className="ec-badge ec-badge--doctype">{docLabel}</span>}
-          {exNum && <span className="ec-badge ec-badge--num">Exercice {exNum}</span>}
+          <span className="ec-badge ec-badge--num">n°{displayNumber}</span>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { exercisesService } from '../../services/exercisesService';
 import ExamSupport from '../../components/ExamSupport/ExamSupport';
 import AnswerExplanation from '../../components/AnswerExplanation/AnswerExplanation';
+import { cleanExercisePrompt } from '../../utils/exerciseDisplay';
 import '../../styles/exerciceView.css';
 
 const IcoArrow = () => (
@@ -324,7 +325,7 @@ const ExerciceItem = () => {
           <div className="question-context">{exercise.context}</div>
         )}
 
-        <div className="question-prompt">{exercise.prompt}</div>
+        <div className="question-prompt">{cleanExercisePrompt(exercise.prompt)}</div>
 
         {/* MCQ */}
         {exercise.type === 'mcq' && (

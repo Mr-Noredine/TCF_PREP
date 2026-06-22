@@ -37,6 +37,7 @@ const CAT_META = {
   grammar:               { color: '#5B54C9', bg: '#F0EFFA', icon: IcoBook     },
   conjugation:           { color: '#4F6BD6', bg: '#EEF2FC', icon: IcoEdit     },
   vocabulary:            { color: '#6366A8', bg: '#F0F1F7', icon: IcoLibrary  },
+  listening_comprehension: { color: '#0891B2', bg: '#ECFEFF', icon: IcoLibrary  },
 };
 
 const CategoryStats = ({ progress }) => {
@@ -67,7 +68,8 @@ const CategoryStats = ({ progress }) => {
         const completed = Math.min(Number(cat.completed_exercises || 0), Number(cat.total_exercises || 0));
         const total     = Number(cat.total_exercises || 0);
         const pct       = total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0;
-        const score     = Math.round(cat.average_score || 0);
+        const hasAttempts = completed > 0;
+        const score     = hasAttempts ? Math.round(cat.average_score || 0) : null;
 
         return (
           <div
@@ -76,7 +78,7 @@ const CategoryStats = ({ progress }) => {
             onClick={() => navigate(`/exercices?category=${cat.category_slug}`)}
             tabIndex="0"
             onKeyDown={e => e.key === 'Enter' && navigate(`/exercices?category=${cat.category_slug}`)}
-            aria-label={`${cat.category_name} — score moyen ${score}%`}
+            aria-label={hasAttempts ? `${cat.category_name} — score moyen ${score}%` : `${cat.category_name} — à découvrir`}
           >
             <div className="ds-cat-card__head">
               <div className="ds-cat-ico" style={{ background: m.bg, color: m.color }}>
@@ -89,7 +91,9 @@ const CategoryStats = ({ progress }) => {
             </div>
 
             <div className="ds-cat-score-row">
-              <span className="ds-cat-score">{score}%</span>
+              <span className={hasAttempts ? 'ds-cat-score' : 'ds-cat-score ds-cat-score--empty'}>
+                {hasAttempts ? `${score}%` : 'À découvrir'}
+              </span>
               <span className="ds-cat-count">{completed}/{total} exercices</span>
             </div>
 

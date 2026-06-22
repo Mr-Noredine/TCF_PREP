@@ -17,7 +17,7 @@ const NEXT_LEVEL = { A1: 'A2', A2: 'B1', B1: 'B2', B2: 'C1', C1: 'C2' };
 const Recommendations = ({ recommendations }) => {
   if (!recommendations) return null;
 
-  const { weakAreas, strongAreas, nextLevel } = recommendations;
+  const { weakAreas, strongAreas, nextLevel, notStartedAreas } = recommendations;
   const recs = [];
 
   weakAreas?.forEach(a => recs.push({
@@ -47,6 +47,14 @@ const Recommendations = ({ recommendations }) => {
       action: 'Commencer', link: `/exercices?category=${a.slug}`,
     });
   });
+
+  notStartedAreas?.forEach(a => recs.push({
+    type: 'discover',
+    label: 'À découvrir',
+    title: `Découvrez ${a.name}`,
+    text: `${a.total_exercises} exercices disponibles. Commencez cette compétence quand vous voulez.`,
+    action: 'Découvrir', link: `/exercices?category=${a.slug}`,
+  }));
 
   if (recs.length === 0) {
     return (

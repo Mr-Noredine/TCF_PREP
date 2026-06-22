@@ -17817,7 +17817,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Où ou quand a lieu le rendez-vous A1-6 ?",
+      "prompt": "Que dit l’audio sur le rendez-vous de Mehdi au café ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -17858,7 +17858,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Où ou quand a lieu le rendez-vous A1-8 ?",
+      "prompt": "Que dit l’audio sur le rendez-vous de Paul dans le bus ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -17899,7 +17899,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Où ou quand a lieu le rendez-vous A1-10 ?",
+      "prompt": "Que dit l’audio sur le rendez-vous de Hugo au café ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -17940,7 +17940,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Où ou quand a lieu le rendez-vous A1-12 ?",
+      "prompt": "Que dit l’audio sur le rendez-vous de Mehdi dans le bus ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -17984,7 +17984,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Où ou quand a lieu le rendez-vous A1-14 ?",
+      "prompt": "Que dit l’audio sur le rendez-vous de Paul au café ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18025,7 +18025,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Où ou quand a lieu le rendez-vous A1-16 ?",
+      "prompt": "Que dit l’audio sur le rendez-vous de Hugo dans le bus ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18066,7 +18066,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Où ou quand a lieu le rendez-vous A1-18 ?",
+      "prompt": "Que dit l’audio sur le rendez-vous de Mehdi au café ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18107,7 +18107,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-6 ?",
+      "prompt": "Quel bus Karim annonce-t-il pour le départ ce soir chez le médecin ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18148,7 +18148,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-8 ?",
+      "prompt": "Quel bus Thomas annonce-t-il pour le départ demain dans le quartier ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18189,7 +18189,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-10 ?",
+      "prompt": "Quel bus Adam annonce-t-il pour le départ hier chez le médecin ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18230,7 +18230,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-12 ?",
+      "prompt": "Quel bus Karim annonce-t-il pour le départ ce soir dans le quartier ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18274,7 +18274,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-14 ?",
+      "prompt": "Quel bus Thomas annonce-t-il pour le départ demain chez le médecin ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18315,7 +18315,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-16 ?",
+      "prompt": "Quel bus Adam annonce-t-il pour le départ hier dans le quartier ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18356,7 +18356,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-18 ?",
+      "prompt": "Quel bus Karim annonce-t-il pour le départ ce soir chez le médecin ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18397,7 +18397,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-20 ?",
+      "prompt": "Quel bus Thomas annonce-t-il pour le départ demain dans le quartier ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18438,7 +18438,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-22 ?",
+      "prompt": "Quel bus Adam annonce-t-il pour le départ hier chez le médecin ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18482,7 +18482,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-24 ?",
+      "prompt": "Quel bus Karim annonce-t-il pour le départ ce soir dans le quartier ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18523,7 +18523,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quel bus est annoncé A2-26 ?",
+      "prompt": "Quel bus Thomas annonce-t-il pour le départ demain chez le médecin ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18564,7 +18564,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-5 ?",
+      "prompt": "Pourquoi la réunion annoncée par la cliente change-t-elle au service logement ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18605,7 +18605,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-7 ?",
+      "prompt": "Pourquoi la réunion annoncée par le voisin change-t-elle à la mairie ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18649,7 +18649,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-9 ?",
+      "prompt": "Pourquoi la réunion annoncée par le technicien change-t-elle au service logement ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18690,7 +18690,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-11 ?",
+      "prompt": "Pourquoi la réunion annoncée par la responsable change-t-elle à la mairie ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18731,7 +18731,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-13 ?",
+      "prompt": "Pourquoi la réunion annoncée par l’étudiante change-t-elle au service logement ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18772,7 +18772,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-15 ?",
+      "prompt": "Pourquoi la réunion annoncée par la cliente change-t-elle à la mairie ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18813,7 +18813,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-17 ?",
+      "prompt": "Pourquoi la réunion annoncée par le voisin change-t-elle au service logement ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18857,7 +18857,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-19 ?",
+      "prompt": "Pourquoi la réunion annoncée par le technicien change-t-elle à la mairie ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18898,7 +18898,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-21 ?",
+      "prompt": "Pourquoi la réunion annoncée par la responsable change-t-elle au service logement ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18939,7 +18939,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-23 ?",
+      "prompt": "Pourquoi la réunion annoncée par l’étudiante change-t-elle à la mairie ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -18980,7 +18980,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-25 ?",
+      "prompt": "Pourquoi la réunion annoncée par la cliente change-t-elle au service logement ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19021,7 +19021,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi la réunion change-t-elle B1-27 ?",
+      "prompt": "Pourquoi la réunion annoncée par le voisin change-t-elle à la mairie ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19065,7 +19065,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-5 ?",
+      "prompt": "Pourquoi le délai mentionné par le responsable est-il prolongé dans ce bulletin ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19106,7 +19106,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-7 ?",
+      "prompt": "Pourquoi le délai mentionné par le comité est-il prolongé dans ce dialogue ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19150,7 +19150,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-9 ?",
+      "prompt": "Pourquoi le délai mentionné par l’association est-il prolongé dans ce interview ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19191,7 +19191,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-11 ?",
+      "prompt": "Pourquoi le délai mentionné par la direction est-il prolongé dans ce annonce audio ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19232,7 +19232,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-13 ?",
+      "prompt": "Pourquoi le délai mentionné par la municipalité est-il prolongé dans ce message vocal ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19273,7 +19273,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-15 ?",
+      "prompt": "Pourquoi le délai mentionné par le responsable est-il prolongé dans ce bulletin ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19314,7 +19314,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-17 ?",
+      "prompt": "Pourquoi le délai mentionné par le comité est-il prolongé dans ce dialogue ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19358,7 +19358,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-19 ?",
+      "prompt": "Pourquoi le délai mentionné par l’association est-il prolongé dans ce interview ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19399,7 +19399,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-21 ?",
+      "prompt": "Pourquoi le délai mentionné par la direction est-il prolongé dans ce annonce audio ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19440,7 +19440,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-23 ?",
+      "prompt": "Pourquoi le délai mentionné par la municipalité est-il prolongé dans ce message vocal ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19481,7 +19481,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-25 ?",
+      "prompt": "Quel objectif justifie le délai prolongé dans ce bulletin ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19522,7 +19522,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Pourquoi le délai est-il prolongé B2-27 ?",
+      "prompt": "Quel objectif justifie le délai prolongé dans ce dialogue ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19566,7 +19566,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle nuance est exprimée C1-5 ?",
+      "prompt": "Quelle nuance entend-on dans le bulletin de l’éditorialiste ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19607,7 +19607,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle nuance est exprimée C1-7 ?",
+      "prompt": "Quelle nuance entend-on dans le dialogue de la chercheuse ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19651,7 +19651,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle nuance est exprimée C1-9 ?",
+      "prompt": "Quelle nuance entend-on dans le interview de la commission ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19692,7 +19692,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle nuance est exprimée C1-11 ?",
+      "prompt": "Quelle nuance entend-on dans le annonce audio de le rapporteur ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19733,7 +19733,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle nuance est exprimée C1-13 ?",
+      "prompt": "Quelle nuance entend-on dans le message vocal de le médiateur ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19774,7 +19774,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle nuance est exprimée C1-15 ?",
+      "prompt": "Quelle nuance entend-on dans le bulletin de l’éditorialiste ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19815,7 +19815,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle nuance est exprimée C1-17 ?",
+      "prompt": "Quelle nuance entend-on dans le dialogue de la chercheuse ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19859,7 +19859,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle nuance est exprimée C1-19 ?",
+      "prompt": "Quelle nuance entend-on dans le interview de la commission ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19900,7 +19900,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle est l’idée principale entendue C2-4 ?",
+      "prompt": "Quelle idée principale ressort du interview de le collectif ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19941,7 +19941,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle est l’idée principale entendue C2-6 ?",
+      "prompt": "Quelle idée principale ressort du annonce audio de l’instance consultative ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -19982,7 +19982,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle est l’idée principale entendue C2-8 ?",
+      "prompt": "Quelle idée principale ressort du message vocal de la juridiction ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -20023,7 +20023,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle est l’idée principale entendue C2-10 ?",
+      "prompt": "Quelle idée principale ressort du bulletin de l’experte ?",
       "context": null,
       "support": {
         "kind": "audio",
@@ -20064,7 +20064,7 @@
       "category_id": "listening_comprehension",
       "subcategory_id": "audio",
       "type": "mcq",
-      "prompt": "Quelle est l’idée principale entendue C2-12 ?",
+      "prompt": "Quelle idée principale ressort du dialogue de le philosophe ?",
       "context": null,
       "support": {
         "kind": "audio",

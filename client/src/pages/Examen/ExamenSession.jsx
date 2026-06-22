@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { examenService } from '../../services/examenService';
 import ExamSupport from '../../components/ExamSupport/ExamSupport';
+import { cleanExercisePrompt } from '../../utils/exerciseDisplay';
 import '../../styles/exerciceView.css';
 import '../../styles/examen.css';
 
@@ -206,7 +207,7 @@ const ExamenSession = () => {
           <div className="question-context">{q.context}</div>
         )}
 
-        <div className="question-prompt">{q.prompt}</div>
+        <div className="question-prompt">{cleanExercisePrompt(q.prompt)}</div>
 
         {q.type === 'mcq' && (
           <div className="answers-grid">

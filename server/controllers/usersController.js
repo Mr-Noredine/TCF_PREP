@@ -255,10 +255,20 @@ export const getRecommendations = async (req, res) => {
       LIMIT 3
     `;
 
-    const [weakAreas, strongAreas, nextLevel] = await Promise.all([
+    const notStartedAreasQuery = `
+      ${progressCte}
+      SELECT name, slug, NULL AS level, average_score, completed_exercises, total_exercises
+      FROM progress
+      WHERE completed_exercises = 0
+      ORDER BY total_exercises DESC, name ASC
+      LIMIT 3
+    `;
+
+    const [weakAreas, strongAreas, nextLevel, notStartedAreas] = await Promise.all([
       pool.query(weakAreasQuery, [userId]),
       pool.query(strongAreasQuery, [userId]),
-      pool.query(nextLevelQuery, [userId])
+      pool.query(nextLevelQuery, [userId]),
+      pool.query(notStartedAreasQuery, [userId])
     ]);
 
     res.json({
@@ -266,7 +276,8 @@ export const getRecommendations = async (req, res) => {
       data: {
         weakAreas: weakAreas.rows,
         strongAreas: strongAreas.rows,
-        nextLevel: nextLevel.rows
+        nextLevel: nextLevel.rows,
+        notStartedAreas: notStartedAreas.rows
       }
     });
   } catch (error) {

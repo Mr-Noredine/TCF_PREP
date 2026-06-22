@@ -370,6 +370,15 @@
   line-height: 1;
 }
 
+.ds-cat-score--empty {
+  font-family: 'Inter', sans-serif;
+  font-size: .82rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #0369A1;
+}
+
 .ds-cat-count {
   font-size: .72rem;
   color: var(--tx-3);
@@ -424,6 +433,7 @@
 .ds-rec-badge--improve  { background: #FEE2E2; color: #DC2626; }
 .ds-rec-badge--continue { background: #DCFCE7; color: #16A34A; }
 .ds-rec-badge--level-up { background: var(--primary-light); color: var(--primary); }
+.ds-rec-badge--discover { background: #E0F2FE; color: #0369A1; }
 
 .ds-rec-title {
   font-family: 'Inter', sans-serif;

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { exercisesService } from '../../services/exercisesService';
 import AnswerExplanation from '../../components/AnswerExplanation/AnswerExplanation';
+import { cleanExercisePrompt } from '../../utils/exerciseDisplay';
 import '../../styles/exerciceView.css';
 
 // ─── Shared results screen ────────────────────────────────────────────────────
@@ -315,7 +316,7 @@ const ExerciceView = () => {
           <div className="question-context">{currentExercise.context}</div>
         )}
 
-        <div className="question-prompt">{currentExercise?.prompt}</div>
+        <div className="question-prompt">{cleanExercisePrompt(currentExercise?.prompt)}</div>
 
         {/* MCQ Type */}
         {currentExercise?.type === 'mcq' && currentExercise?.choices && (
